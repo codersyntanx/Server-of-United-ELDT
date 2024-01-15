@@ -207,7 +207,7 @@ app.post("/api/postpayment", async (req, res) => {
     });
   }
 });
-const  {sendRoleUpdateNotification}  = require("./sendRoleUpdateNotification");
+const  {sendRoleUpdateNotification}  = require("../sendRoleUpdateNotification");
 
 const {sendpdf} = require("./sendpdf")
 app.get("/api/plans", async (req, res) => {
