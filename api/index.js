@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 
 
 // ...
-app.post('/addCourseWithLessons', async (req, res) => {
+app.post('/api/addCourseWithLessons', async (req, res) => {
   try {
     // Extract course data from the request body
     const { courseName, category, price, image, lessons } = req.body;
@@ -75,7 +75,7 @@ app.post('/addCourseWithLessons', async (req, res) => {
   }
 });
 
-app.post('/addLesson/:courseId', async (req, res) => {
+app.post('/api/addLesson/:courseId', async (req, res) => {
   const { courseId } = req.params;
   const { language, lessonTitle, pages } = req.body;
 
@@ -115,7 +115,7 @@ app.post('/addLesson/:courseId', async (req, res) => {
 
 
 // Create Course
-app.post('/create', async (req, res) => {
+app.post('/api/create', async (req, res) => {
   try {
     const { courseName, category, price, image, chapters } = req.body;
 
@@ -141,7 +141,7 @@ app.post('/create', async (req, res) => {
 });
 
 // Add Chapter to Course
-app.put('/addChapter/:courseId', async (req, res) => {
+app.put('/api/addChapter/:courseId', async (req, res) => {
   try {
     const { courseId } = req.params;
     const { chapter } = req.body;
@@ -187,11 +187,11 @@ app.put("/api/putstudent/:id", async (req, res) => {
       });
   }
 });
-app.get('/courses', (req, res) => {
+app.get('/api/courses', (req, res) => {
   res.json(courseData);
 });
 
-app.post("/postpayment", async (req, res) => {
+app.post("/api/postpayment", async (req, res) => {
   console.log(req.body)
   try {
     const paymentinfo = await paymentModel.create(req.body);
@@ -363,7 +363,7 @@ app.post("/api/login", async (request, response) => {
     }
   }
 });
-app.get("/studentbyid/:id", async (req, res) => {
+app.get("/api/studentbyid/:id", async (req, res) => {
   try {
     const student = await studentModel.findById(req.params.id);
     if (!student) {
@@ -377,7 +377,7 @@ app.get("/studentbyid/:id", async (req, res) => {
 });
 
 // Assuming you have a field 'email' in your student schema
-app.get("/studentbyemail/:email", async (req, res) => {
+app.get("/api/studentbyemail/:email", async (req, res) => {
   try {
     const student = await studentModel.findOne({ Email: req.params.email });
     if (!student) {
@@ -425,7 +425,7 @@ app.post("/api/sendforgetpassword", async (req, res) => {
   }
 });
 
-app.get('/getDocxContent', (req, res) => {
+app.get('/api/getDocxContent', (req, res) => {
   // Replace 'path/to/your/google-doc.txt' with the actual path to your Google Doc file
   const filePath = path.join(__dirname, './lesson 1 new-ORIENTATION.docx');
   fs.readFile(filePath, (err, binaryContent) => {
