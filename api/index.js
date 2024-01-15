@@ -209,7 +209,7 @@ app.post("/api/postpayment", async (req, res) => {
 });
 const  {sendRoleUpdateNotification}  = require("../sendRoleUpdateNotification");
 
-const {sendpdf} = require("./sendpdf")
+const {sendpdf} = require("../sendpdf")
 app.get("/api/plans", async (req, res) => {
   try {
     const allplans = await PlanModel.find();
@@ -427,7 +427,7 @@ app.post("/api/sendforgetpassword", async (req, res) => {
 
 app.get('/api/getDocxContent', (req, res) => {
   // Replace 'path/to/your/google-doc.txt' with the actual path to your Google Doc file
-  const filePath = path.join(__dirname, './lesson 1 new-ORIENTATION.docx');
+  const filePath = path.join(__dirname, '../lesson 1 new-ORIENTATION.docx');
   fs.readFile(filePath, (err, binaryContent) => {
     if (err) {
       console.error(err);
