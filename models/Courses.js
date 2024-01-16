@@ -9,13 +9,17 @@ const pageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+});
+
+const chapterSchema = new mongoose.Schema({
+  lessonTitle: {
+    type: String,
+    required: true,
+  },
   language: {
     type: String,
     required: true,
   },
-});
-
-const chapterSchema = new mongoose.Schema({
   pages: [pageSchema],
 });
 
@@ -24,20 +28,20 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  category:{
+  category: {
     type: String,
     required: true,
   },
-  price:{
+  price: {
     type: String,
     required: true,
   },
-  image:{
+  image: {
     type: String,
     required: true,
   },
   chapters: [chapterSchema],
-},{timestamps:true});
+}, { timestamps: true });
 
 const Course = mongoose.model("Course", courseSchema);
 

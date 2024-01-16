@@ -81,7 +81,7 @@ app.post('/api/addLesson/:courseId', async (req, res) => {
 
   try {
     // Check if the course exists
-    const course = await mainPlanModel.findById(courseId);
+    const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
     }

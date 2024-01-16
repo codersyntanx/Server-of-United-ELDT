@@ -19,7 +19,7 @@ const secretkey = '2783flksjda0/.-=--982jna,769384;'
 const fs = require('fs');
 const path = require('path');
 const courseData = require('./Classa');
-const Lesson = require('./models/Lesson');
+const Question = require('./models/Lesson');
 const Course = require('./models/Courses');
 const {Newpaper} = require("./Newspaper")
 const { sendpassword } = require("./resetpass")
@@ -29,40 +29,59 @@ app.use(bodyParser.json());
 
 
 
-// ...
-app.post('/addCourseWithLessons', async (req, res) => {
-  try {
-    // Extract course data from the request body
-    const { courseName, category, price, image, lessons } = req.body;
 
+app.post('/addQuestions', async (req, res) => {
+  try {
+    const { lessonId, questions } = req.body;
     // Validate incoming data
-    if (!courseName || !category || !price || !image) {
+    if (!lessonId || !questions || !Array.isArray(questions)) {
       return res.status(400).json({ error: 'Invalid data. Please provide all required fields.' });
     }
 
-    // Create an array to store lesson documents
-    const lessonDocuments = [];
+const question = await Question.create(req.body)
 
-    // Iterate through the provided lessons and create Lesson documents
-    for (const lessonData of lessons) {
-      const newLesson = new Lesson({
-        language: lessonData.language,
-        lessonTitle: lessonData.lessonTitle,
-        pages: lessonData.pages,
-      });
+    res.status(201).json({ message: 'Questions added successfully.' });
+  } catch (error) {
+    console.error('Error adding questions:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-      // Save the lesson and push its ID to the array
-      const savedLesson = await newLesson.save();
-      lessonDocuments.push(savedLesson._id);
+
+app.get('/getQuestionsByLessonId/:lessonId', async (req, res) => {
+  try {
+    const lessonId = req.params.lessonId;
+
+    // Validate lessonId
+    if (!lessonId) {
+      return res.status(400).json({ error: 'Invalid lesson ID.' });
     }
 
-    // Create a new mainplan document with the provided data and the array of lesson IDs
-    const newCourse = new mainPlanModel({
+    // Fetch questions based on lessonId
+    const questions = await Question.find({ lessonId });
+
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error('Error fetching questions by lesson ID:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/addCourseWithLessons', async (req, res) => {
+  try {
+    const { courseName, category, price, image, chapters } = req.body;
+    // Validate incoming data
+    if (!courseName || !category || !price || !image || !chapters) {
+      return res.status(400).json({ error: 'Invalid data. Please provide all required fields.' });
+    }
+
+    // Create a new course document with the provided data
+    const newCourse = new Course({
       courseName,
       category,
       price,
       image,
-      lessons: lessonDocuments,
+      chapters,
     });
 
     // Save the new course document
@@ -75,13 +94,14 @@ app.post('/addCourseWithLessons', async (req, res) => {
   }
 });
 
-app.post('/addLesson/:courseId', async (req, res) => {
+
+app.put('/addLesson/:courseId', async (req, res) => {
   const { courseId } = req.params;
-  const { language, lessonTitle, pages } = req.body;
+  const { lessonTitle, language, pages } = req.body;
 
   try {
     // Check if the course exists
-    const course = await mainPlanModel.findById(courseId);
+    const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
     }
@@ -91,26 +111,23 @@ app.post('/addLesson/:courseId', async (req, res) => {
       return res.status(400).json({ error: 'Invalid data. Please provide language, lessonTitle, and pages.' });
     }
 
-    // Create a new lesson
-    const newLesson = new Lesson({
-      language,
+    // Add the lesson directly to the course
+    course.chapters.push({
       lessonTitle,
+      language,
       pages,
     });
 
-    // Save the lesson
-    const savedLesson = await newLesson.save();
-
-    // Add the lesson to the course
-    course.lessons.push(savedLesson);
+    // Save the updated course
     await course.save();
 
-    res.status(201).json(savedLesson);
+    res.status(201).json({ message: 'Lesson added to the course successfully' });
   } catch (error) {
     console.error('Error adding lesson:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 

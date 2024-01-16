@@ -12,6 +12,10 @@ const studentSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    language:{
+      type:String,
+      default:"English"
+    }
   }],
   fullName: {
     type: String,
@@ -31,9 +35,6 @@ const studentSchema = new mongoose.Schema({
   zip: {
     type: String,
     required: true,
-  },
-  language: {
-    type: String,
   },
   firstName: {
     type: String,
