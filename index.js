@@ -258,42 +258,38 @@ app.get("/api/plansed/:id", async (req, res) => {
   }
 });
 
-app.post("/api/create-payment-intents", async (req, res) => {
+app.post('/api/create-payment-intents', async (req, res) => {
   try {
-    // Check if a user with the given email already exists
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
-
-    // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
       amount: req.body.amount,
-      currency: "usd",
+      currency: 'usd',
     });
 
     if (existingStudent) {
-      // If the user already exists, add the new courseId to the array
-      existingStudent.courseIds.push(req.body.courseId);
+      for (const enrollment of req.body.courseEnrollments) {
+        existingStudent.courseEnrollments.push(enrollment);
+      }
       await existingStudent.save();
-
-      // Perform other actions if needed
 
       return res.status(200).json({
         clientSecret: paymentIntent.client_secret,
-        message: 'User found and updated with new courseId',
+        message: 'User found and updated with new course enrollments',
       });
     } else {
-      // If the user doesn't exist, create a new one
       const student = await studentModel.create({
         ...req.body,
-        courseIds: [req.body.courseId], // Initialize the array with the first courseId
+        courseEnrollments: req.body.courseEnrollments,
       });
 
       const generatedPassword = student.password;
-      const Emailof = student.Email;
-      await sendloginpassword(Emailof, generatedPassword);
+      const emailOf = student.Email;
+      // Assuming you have a function to send login details to the user
+       await sendloginpassword(emailOf, generatedPassword);
 
       return res.status(200).json({
         clientSecret: paymentIntent.client_secret,
-        message: 'User created with courseId',
+        message: 'User created with course enrollments',
       });
     }
   } catch (error) {
