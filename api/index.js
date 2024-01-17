@@ -23,6 +23,8 @@ const Lesson = require('../models/Lesson');
 const Course = require('../models/Courses');
 const {Newpaper} = require("../Newspaper")
 const { sendpassword } = require("../resetpass")
+const Question = require('../models/Lesson');
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
