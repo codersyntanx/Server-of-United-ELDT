@@ -26,6 +26,99 @@ const { sendpassword } = require("./resetpass")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.get('/api/student/:studentId/courses', async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    const student = await studentModel.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+     const coursesData = await fetchCoursesData(student.courseEnrollments);
+    const completedCourses = [];
+    const uncompletedCourses = [];
+
+    for (const courseData of coursesData) {
+      const completed = courseData.completed;
+      const totalChapters = courseData.totalChapters;
+      const completedChapters = courseData.completedChapters;
+      const studentProgress = calculateStudentProgress(completedChapters, totalChapters);
+
+      if (completed) {
+        completedCourses.push({
+          courseName: courseData.courseName,
+          courseNameid: courseData.courseNameid,
+          totalChapters: totalChapters,
+          completedChapters: completedChapters,
+          studentProgress: studentProgress,
+        });
+      } else {
+        uncompletedCourses.push({
+          courseName: courseData.courseName,
+          courseNameid: courseData.courseNameid,
+          totalChapters: totalChapters,
+          completedChapters: completedChapters,
+          studentProgress: studentProgress,
+        });
+      }
+    }
+
+    res.status(200).json({
+      completedCourses: completedCourses,
+      uncompletedCourses: uncompletedCourses,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+async function fetchCoursesData(courseEnrollments) {
+  const coursesData = [];
+
+  for (const enrollment of courseEnrollments) {
+    const courseId = enrollment.courseId;
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      console.warn(`Course with ID ${courseId} not found.`);
+      continue;
+    }
+
+    const language = enrollment.language;
+    const totalChapters = getTotalChapters(course, language);
+    const completedChapters = enrollment.lessonIndex ; // Assuming lessonIndex is 0-based
+
+    coursesData.push({
+      courseName: course.courseName,
+      courseNameid: course._id,
+      completed: enrollment.completed || false,
+      totalChapters: totalChapters,
+      completedChapters: completedChapters,
+    });
+  }
+
+  return coursesData;
+}
+function getTotalChapters(course, language) {
+  let totalChapters = 0;
+
+  for (const chapter of course.chapters) {
+    if (chapter.language === language) {
+      totalChapters += 1;
+    }
+  }
+
+  return totalChapters;
+}
+
+
+function calculateStudentProgress(completedChapters, totalChapters) {
+  const progressPercentage = (completedChapters / totalChapters) * 100 || 0;
+  return `${progressPercentage.toFixed(2)}%`;
+}
+
+
 
 
 app.get("/api/courses", async (req, res) => {

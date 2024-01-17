@@ -29,6 +29,58 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 
+app.get('/api/student/:studentId/courses', async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    const student = await studentModel.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const coursesData = await fetchCoursesData(student.courseEnrollments);
+    res.status(200).json(coursesData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+async function fetchCoursesData(courseEnrollments) {
+  const coursesData = [];
+
+  for (const enrollment of courseEnrollments) {
+    const courseId = enrollment.courseId;
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      console.warn(`Course with ID ${courseId} not found.`);
+      continue;
+    }
+
+    const language = enrollment.language;
+    const totalLessons = getTotalLessons(course, language);
+
+    coursesData.push({
+      courseName: course.courseName,
+      totalLessons: totalLessons,
+    });
+  }
+
+  return coursesData;
+}
+
+function getTotalLessons(course, language) {
+  let totalLessons = 0;
+
+  for (const chapter of course.chapters) {
+    if (chapter.language === language) {
+      totalLessons += chapter.pages.length;
+    }
+  }
+
+  return totalLessons;
+}
 
 
 // ...
