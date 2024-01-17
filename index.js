@@ -28,7 +28,15 @@ app.use(bodyParser.json());
 
 
 
-
+app.get("/api/courses", async (req, res) => {
+  try {
+    const courses = await Course.find({}, "courseName category price image").exec();
+    res.json(courses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 app.post('/addQuestions', async (req, res) => {
   try {

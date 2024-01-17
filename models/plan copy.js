@@ -5,7 +5,7 @@ const studentSchema = new mongoose.Schema({
   courseEnrollments: [{
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'ELDTPlans',
+      ref: 'Course',
       required: true,
     },
     lessonIndex: {
@@ -15,6 +15,10 @@ const studentSchema = new mongoose.Schema({
     language:{
       type:String,
       default:"English"
+    },
+    completed:{
+      type:Boolean,
+      default:false
     }
   }],
   fullName: {

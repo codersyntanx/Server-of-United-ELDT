@@ -74,10 +74,25 @@ app.post('/api/addCourseWithLessons', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+app.post('/api/addQuestions', async (req, res) => {
+  try {
+    const { lessonId, questions } = req.body;
+    // Validate incoming data
+    if (!lessonId || !questions || !Array.isArray(questions)) {
+      return res.status(400).json({ error: 'Invalid data. Please provide all required fields.' });
+    }
 
-app.post('/api/addLesson/:courseId', async (req, res) => {
+const question = await Question.create(req.body)
+
+    res.status(201).json({ message: 'Questions added successfully.' });
+  } catch (error) {
+    console.error('Error adding questions:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.put('/api/addLesson/:courseId', async (req, res) => {
   const { courseId } = req.params;
-  const { language, lessonTitle, pages } = req.body;
+  const { lessonTitle, language, pages } = req.body;
 
   try {
     // Check if the course exists
@@ -91,21 +106,17 @@ app.post('/api/addLesson/:courseId', async (req, res) => {
       return res.status(400).json({ error: 'Invalid data. Please provide language, lessonTitle, and pages.' });
     }
 
-    // Create a new lesson
-    const newLesson = new Lesson({
-      language,
+    // Add the lesson directly to the course
+    course.chapters.push({
       lessonTitle,
+      language,
       pages,
     });
 
-    // Save the lesson
-    const savedLesson = await newLesson.save();
-
-    // Add the lesson to the course
-    course.lessons.push(savedLesson);
+    // Save the updated course
     await course.save();
 
-    res.status(201).json(savedLesson);
+    res.status(201).json({ message: 'Lesson added to the course successfully' });
   } catch (error) {
     console.error('Error adding lesson:', error);
     res.status(500).json({ error: 'Internal Server Error' });
