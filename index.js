@@ -22,9 +22,61 @@ const courseData = require('./Classa');
 const Question = require('./models/Lesson');
 const Course = require('./models/Courses');
 const {Newpaper} = require("./Newspaper")
+const Results = require('./models/Results');
 const { sendpassword } = require("./resetpass")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+
+
+
+app.post('/saveResult', async (req, res) => {
+  try {
+    const { studentId, courseId, chapterId, percentage } = req.body;
+
+    // Check if the result for this chapter already exists
+    const existingResult = await Results.findOne({
+      studentId,
+      courseId,
+      chapterId,
+    });
+
+    // Check if the percentage is 80 or above to save or update the result
+    if (percentage >= 80) {
+      // If result exists, update it; otherwise, create a new result
+      if (existingResult) {
+        existingResult.percentage = percentage;
+        await existingResult.save();
+      } else {
+        // Find and update the student's lessonIndex for the given course
+        const student = await studentModel.findById(studentId);
+        const enrollment = student.courseEnrollments.find(enrollment => enrollment.courseId.equals(courseId));
+
+        // Only increase lessonIndex if the current lessonIndex matches
+        if (enrollment) {
+          enrollment.lessonIndex += 1;
+          await student.save();
+        }
+
+        // Create a new result and save it
+        const newResult = new Results({
+          studentId,
+          courseId,
+          chapterId,
+          percentage,
+        });
+        await newResult.save();
+      }
+
+      res.status(200).json({ success: true });
+    } else {
+      res.status(400).json({ error: 'Percentage is below 80%. Result not saved.' });
+    }
+  } catch (error) {
+    console.error('Error saving or updating result:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
@@ -315,6 +367,55 @@ const question = await Question.create(req.body)
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+const fetchCorrectAnswers = async () => {
+  try {
+    const questions = await Question.find({}, { 'questions._id': 1, 'questions.options': 1 });
+console.log(questions)
+    return questions.map((question) => ({
+      questionId: question._id.toString(), // Ensure questionId is converted to string
+      correctOption: question.questions.findIndex((opt) => opt.isCorrect),
+    }));
+  } catch (error) {
+    console.error('Error fetching correct answers:', error);
+    return [];
+  }
+};
+
+
+app.post('/submitAnswers', async (req, res) => {
+  try {
+    const correctAnswers = await fetchCorrectAnswers();
+    console.log(correctAnswers)
+    const userAnswers = req.body;
+
+    const results = userAnswers.map((userAnswer) => {
+      const correctAnswer = correctAnswers.find((answer) => answer.questionId === userAnswer.questionId);
+
+      const isCorrect = correctAnswer
+        ? userAnswer.selectedOption === correctAnswer.correctOption
+        : false;
+
+      const resultObject = {
+        questionId: userAnswer.questionId,
+        userSelectedOption: userAnswer.selectedOption,
+        isCorrect,
+      };
+
+      if (correctAnswer) {
+        resultObject.correctOption = correctAnswer.correctOption;
+      }
+
+      return resultObject;
+    });
+
+
+    res.status(200).json({ success: true, results });
+  } catch (error) {
+    console.error('Error processing answers:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 
 
 app.get('/getQuestionsByLessonId/:lessonId', async (req, res) => {
@@ -325,11 +426,62 @@ app.get('/getQuestionsByLessonId/:lessonId', async (req, res) => {
     }
 
     // Fetch questions based on lessonId, excluding the isCorrect field
-    const questions = await Question.find({ lessonId }, { 'questions.options.isCorrect': 0 });
+    const questions = await Question.find({ lessonId });
 
     res.status(200).json(questions);
   } catch (error) {
     console.error('Error fetching questions by lesson ID:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (req, res) => {
+  try {
+    const { studentId, courseId, indexNumber } = req.params;
+
+    // Check if the student is enrolled in the specified course
+    const student = await studentModel.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const enrollment = student.courseEnrollments.find(
+      (enrollment) => enrollment.courseId.toString() === courseId
+    );
+
+    if (!enrollment) {
+      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    }
+
+    const lessonIndex = enrollment.lessonIndex;
+
+    // Find the course by ID
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Find the chapter based on the provided index number
+    const chapterIndex = parseInt(indexNumber, 10);
+    if (isNaN(chapterIndex)) {
+      return res.status(400).json({ error: 'Invalid index number' });
+    }
+
+    if (chapterIndex > lessonIndex) {
+      return res.status(400).json({ error: 'Index number must be less than or equal to lessonIndex' });
+    }
+
+    const chapter = course.chapters[chapterIndex];
+    if (!chapter) {
+      return res.status(404).json({ error: 'Chapter not found' });
+    }
+const chaptertitle = chapter.lessonTitle
+    // Fetch questions based on the chapter's lesson ID
+    const questions = await Question.find({ lessonId: chapter._id });
+
+    res.status(200).json({questions, chaptertitle});
+  } catch (error) {
+    console.error('Error fetching questions for student:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
