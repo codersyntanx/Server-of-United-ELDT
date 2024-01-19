@@ -26,6 +26,174 @@ const { sendpassword } = require("./resetpass")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+
+
+app.get('/getCourseChapters/:studentId/:courseId', async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+
+    // Find the student by ID
+    const student = await studentModel.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Check if the student is enrolled in the specified course
+    const enrollment = student.courseEnrollments.find(
+      (enrollment) => enrollment.courseId.toString() === courseId
+    );
+
+    if (!enrollment) {
+      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    }
+
+    // Find the course by ID
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Extract information based on language and lesson index
+    const { language, lessonIndex } = enrollment;
+
+    // Filter chapters by language and get the chapters up to the lessonIndex
+    const chaptersToSend = course.chapters
+      .filter((chapter) => chapter.language === language)
+      .slice(0, lessonIndex + 1);
+
+    // Calculate student progress percentage
+    const totalChapters = course.chapters.length;
+    const progressPercentage = (lessonIndex + 1) / totalChapters * 100;
+
+    return res.json({
+      studentProgress: {
+        lessonIndex: lessonIndex + 1,
+        totalChapters,
+        progressPercentage,
+      },
+      courseName: course.courseName,
+      language,
+      chapters: chaptersToSend,
+     
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/getChapterTitles/:studentId/:courseId', async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+
+    // Find the student by ID
+    const student = await studentModel.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Check if the student is enrolled in the specified course
+    const enrollment = student.courseEnrollments.find(
+      (enrollment) => enrollment.courseId.toString() === courseId
+    );
+
+    if (!enrollment) {
+      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    }
+
+    // Find the course by ID
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Extract information based on language and lesson index
+    const { language, lessonIndex } = enrollment;
+
+    // Get chapter titles and availability status
+    const chapterTitles = course.chapters
+      .filter((chapter) => chapter.language === language) // Filter chapters by language
+      .map((chapter, index) => {
+        return {
+          title: chapter.lessonTitle,
+          chapId:chapter._id,
+          available: index <= lessonIndex, // Chapter is available if its index is less than or equal to lessonIndex
+        };
+      });
+
+    return res.json({
+      courseName: course.courseName,
+      language,
+      chapters: chapterTitles,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+app.get('/getLastChapter/:studentId/:courseId', async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+
+    // Find the student by ID
+    const student = await studentModel.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Check if the student is enrolled in the specified course
+    const enrollment = student.courseEnrollments.find(
+      (enrollment) => enrollment.courseId.toString() === courseId
+    );
+
+    if (!enrollment) {
+      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    }
+
+    // Find the course by ID
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Extract information based on language and lesson index
+    const { language, lessonIndex } = enrollment;
+
+    // Get the last available chapter
+    const lastChapter = course.chapters
+      .filter((chapter) => chapter.language === language) // Filter chapters by language
+      .filter((chapter, index) => index <= lessonIndex) // Filter available chapters
+      .pop(); // Get the last chapter
+
+    if (!lastChapter) {
+      return res.json({ error: 'No available chapters' });
+    }
+
+    return res.json({
+      chapterId: lastChapter._id,
+      chapterTitle: lastChapter.lessonTitle,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
+
+
 app.get('/api/student/:studentId/courses', async (req, res) => {
   try {
     const studentId = req.params.studentId;
@@ -152,14 +320,12 @@ const question = await Question.create(req.body)
 app.get('/getQuestionsByLessonId/:lessonId', async (req, res) => {
   try {
     const lessonId = req.params.lessonId;
-
-    // Validate lessonId
     if (!lessonId) {
       return res.status(400).json({ error: 'Invalid lesson ID.' });
     }
 
-    // Fetch questions based on lessonId
-    const questions = await Question.find({ lessonId });
+    // Fetch questions based on lessonId, excluding the isCorrect field
+    const questions = await Question.find({ lessonId }, { 'questions.options.isCorrect': 0 });
 
     res.status(200).json(questions);
   } catch (error) {
@@ -167,6 +333,8 @@ app.get('/getQuestionsByLessonId/:lessonId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
 
 app.post('/addCourseWithLessons', async (req, res) => {
   try {
