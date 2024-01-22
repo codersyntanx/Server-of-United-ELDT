@@ -41,6 +41,8 @@ app.post('/saveResult', async (req, res) => {
       chapterId,
     });
 
+    let enrollment; // Define enrollment variable outside the block
+
     // Check if the percentage is 80 or above to save or update the result
     if (percentage >= 80) {
       // If result exists, update it; otherwise, create a new result
@@ -50,11 +52,28 @@ app.post('/saveResult', async (req, res) => {
       } else {
         // Find and update the student's lessonIndex for the given course
         const student = await studentModel.findById(studentId);
-        const enrollment = student.courseEnrollments.find(enrollment => enrollment.courseId.equals(courseId));
 
-        // Only increase lessonIndex if the current lessonIndex matches
+        if (!student) {
+          return res.status(404).json({ error: 'Student not found' });
+        }
+
+        enrollment = student.courseEnrollments.find(enrollment => enrollment.courseId.equals(courseId));
+
         if (enrollment) {
-          enrollment.lessonIndex += 1;
+          const course = await Course.findById(courseId);
+
+          if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+          }
+
+          const totalChapters = course.chapters.filter(chapter => chapter.language === enrollment.language).length;
+
+          if (enrollment.lessonIndex + 1 < totalChapters) {
+            enrollment.lessonIndex += 1;
+          } else if (enrollment.lessonIndex + 1 === totalChapters) {
+            enrollment.completed = true;
+          }
+
           await student.save();
         }
 
@@ -68,15 +87,19 @@ app.post('/saveResult', async (req, res) => {
         await newResult.save();
       }
 
-      res.status(200).json({ success: true });
+      res.status(200).json({ success: true, completed: enrollment.completed });
     } else {
-      res.status(400).json({ error: 'Percentage is below 80%. Result not saved.' });
+      res.status(400).json({ error: 'Percentage is below 80%. Result not saved.', completed: false });
     }
   } catch (error) {
     console.error('Error saving or updating result:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+
+
 
 
 
@@ -763,7 +786,7 @@ app.post("/api/login", async (request, response) => {
     // Use === for comparison
     if (password === person.password) {
       const token = jwt.sign(
-        {  Email: person.Email, id: person._id },
+        {  Email: person.Email, id: person._id ,Name :person.fullName},
         secretkey
       );
       return response.json({
