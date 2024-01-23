@@ -295,6 +295,8 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
           totalChapters: totalChapters,
           completedChapters: completedChapters,
           studentProgress: studentProgress,
+          courselangugae : courseData.courselangugae
+
         });
       } else {
         uncompletedCourses.push({
@@ -303,6 +305,8 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
           totalChapters: totalChapters,
           completedChapters: completedChapters,
           studentProgress: studentProgress,
+          courselangugae : courseData.courselangugae
+
         });
       }
     }
@@ -338,6 +342,8 @@ async function fetchCoursesData(courseEnrollments) {
       completed: enrollment.completed || false,
       totalChapters: totalChapters,
       completedChapters: completedChapters,
+      courselangugae: language,
+
     });
   }
 
