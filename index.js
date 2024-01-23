@@ -768,11 +768,11 @@ app.post("/api/sennews", async (req, res) => {
 });
 
 app.post("/api/login", async (request, response) => {
-  console.log(request.body);
 
   try {
     const { Email, password } = request.body;
-    const person = await studentModel.findOne({ Email: Email });
+    const person = await studentModel.findOne({ Email: { $regex: new RegExp('^' + Email + '$', 'i') } });
+ 
 
     if (!person) {
       return response.json({
