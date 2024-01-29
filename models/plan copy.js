@@ -61,7 +61,7 @@ const studentSchema = new mongoose.Schema({
 });
 
 studentSchema.pre("save", async function (next) {
-  // Generate a temporary password only if it's a new student and no password is provided
+  // Generate a temporary password only if it's a new student or password is being modified
   if (!this.isModified("password") || !this.password) {
     try {
       const temporaryPassword = generateTemporaryPassword();
@@ -78,6 +78,8 @@ studentSchema.pre("save", async function (next) {
     next();
   }
 });
+
+
 
 const studentModel = mongoose.model("student", studentSchema);
 
