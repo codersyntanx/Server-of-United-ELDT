@@ -157,9 +157,9 @@ app.get('/api/getCourseChapters/:studentId/:courseId', async (req, res) => {
 });
 
 
-app.get('/api/getChapterTitles/:studentId/:courseId', async (req, res) => {
+app.get('/api/getChapterTitles/:studentId/:enrolledCourseIndex', async (req, res) => {
   try {
-    const { studentId, courseId } = req.params;
+    const { studentId, enrolledCourseIndex } = req.params;
 
     // Find the student by ID
     const student = await studentModel.findById(studentId);
@@ -168,14 +168,18 @@ app.get('/api/getChapterTitles/:studentId/:courseId', async (req, res) => {
       return res.status(404).json({ error: 'Student not found' });
     }
 
-    // Check if the student is enrolled in the specified course
-    const enrollment = student.courseEnrollments.find(
-      (enrollment) => enrollment.courseId.toString() === courseId
-    );
-
-    if (!enrollment) {
-      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    // Check if the student has any course enrollment
+    if (!student.courseEnrollments || student.courseEnrollments.length === 0) {
+      return res.status(400).json({ error: 'Student is not enrolled in any courses' });
     }
+
+    // Check if the enrolledCourseIndex is within bounds
+    if (enrolledCourseIndex < 0 || enrolledCourseIndex >= student.courseEnrollments.length) {
+      return res.status(400).json({ error: 'Invalid enrolled course index' });
+    }
+
+    // Get the course ID based on the enrolledCourseIndex
+    const courseId = student.courseEnrollments[enrolledCourseIndex].courseId;
 
     // Find the course by ID
     const course = await Course.findById(courseId);
@@ -185,7 +189,7 @@ app.get('/api/getChapterTitles/:studentId/:courseId', async (req, res) => {
     }
 
     // Extract information based on language and lesson index
-    const { language, lessonIndex } = enrollment;
+    const { language, lessonIndex } = student.courseEnrollments[enrolledCourseIndex];
 
     // Get chapter titles and availability status
     const chapterTitles = course.chapters
@@ -193,7 +197,7 @@ app.get('/api/getChapterTitles/:studentId/:courseId', async (req, res) => {
       .map((chapter, index) => {
         return {
           title: chapter.lessonTitle,
-          chapId:chapter._id,
+          chapId: chapter._id,
           available: index <= lessonIndex, // Chapter is available if its index is less than or equal to lessonIndex
         };
       });
@@ -208,6 +212,7 @@ app.get('/api/getChapterTitles/:studentId/:courseId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
