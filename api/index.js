@@ -120,7 +120,7 @@ app.get('/api/getCourseChapters/:studentId/:enrolledCourseIndex', async (req, re
     }
 
     const enrollment = student.courseEnrollments[enrolledCourseIndex];
-
+const mainquizid = enrollment.courseId;
     // Find the course by ID
     const course = await Course.findById(enrollment.courseId);
 
@@ -152,6 +152,7 @@ app.get('/api/getCourseChapters/:studentId/:enrolledCourseIndex', async (req, re
       courseName: course.courseName,
       language,
       chapters: chaptersToSend,
+      quizid : mainquizid
     });
   } catch (error) {
     console.error(error);
