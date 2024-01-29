@@ -780,12 +780,13 @@ app.post("/api/sennews", async (req, res) => {
   }
 });
 
+
 app.post("/api/login", async (request, response) => {
-  console.log(request.body);
 
   try {
     const { Email, password } = request.body;
     const person = await studentModel.findOne({ Email: { $regex: new RegExp('^' + Email + '$', 'i') } });
+ 
 
     if (!person) {
       return response.json({
@@ -799,7 +800,7 @@ app.post("/api/login", async (request, response) => {
     // Use === for comparison
     if (password === person.password) {
       const token = jwt.sign(
-        {  Email: person.Email, id: person._id ,Name :person.fullName},
+        {  Email: person.Email, id: person._id ,Name :person.fullName,Address:person.address,zip:person.zip},
         secretkey
       );
       return response.json({
