@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -287,6 +288,7 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
       const totalChapters = courseData.totalChapters;
       const completedChapters = courseData.completedChapters;
       const studentProgress = calculateStudentProgress(completedChapters, totalChapters);
+
       if (completed) {
         completedCourses.push({
           courseName: courseData.courseName,
@@ -295,6 +297,7 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
           completedChapters: completedChapters,
           studentProgress: studentProgress,
           courselangugae : courseData.courselangugae
+
         });
       } else {
         uncompletedCourses.push({
@@ -304,6 +307,7 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
           completedChapters: completedChapters,
           studentProgress: studentProgress,
           courselangugae : courseData.courselangugae
+
         });
       }
     }
@@ -340,6 +344,7 @@ async function fetchCoursesData(courseEnrollments) {
       totalChapters: totalChapters,
       completedChapters: completedChapters,
       courselangugae: language,
+
     });
   }
 
@@ -366,7 +371,7 @@ function calculateStudentProgress(completedChapters, totalChapters) {
 
 
 
-app.get("/api/courses", async (req, res) => {
+app.get("/api/api/courses", async (req, res) => {
   try {
     const courses = await Course.find({}, "courseName category price image").exec();
     res.json(courses);
@@ -479,6 +484,7 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
     }
 
     const lessonIndex = enrollment.lessonIndex;
+    const language = enrollment.language; // Assuming the language is stored in the student object
 
     // Find the course by ID
     const course = await Course.findById(courseId);
@@ -486,7 +492,7 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    // Find the chapter based on the provided index number
+    // Find the chapter based on the provided index number and language
     const chapterIndex = parseInt(indexNumber, 10);
     if (isNaN(chapterIndex)) {
       return res.status(400).json({ error: 'Invalid index number' });
@@ -496,20 +502,31 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(400).json({ error: 'Index number must be less than or equal to lessonIndex' });
     }
 
-    const chapter = course.chapters[chapterIndex];
+    // Filter chapters based on language
+    const chaptersByLanguage = course.chapters.filter((chapter) => chapter.language === language);
+    if (chaptersByLanguage.length === 0) {
+      return res.status(404).json({ error: 'Chapters not found for the specified language' });
+    }
+
+    const chapter = chaptersByLanguage[chapterIndex];
     if (!chapter) {
       return res.status(404).json({ error: 'Chapter not found' });
     }
-const chaptertitle = chapter.lessonTitle
+
+    const chaptertitle = chapter.lessonTitle;
+    console.log(chapter._id);
+
     // Fetch questions based on the chapter's lesson ID
     const questions = await Question.find({ lessonId: chapter._id });
+    console.log(questions);
 
-    res.status(200).json({questions, chaptertitle});
+    res.status(200).json({ questions, chaptertitle });
   } catch (error) {
     console.error('Error fetching questions for student:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
@@ -650,7 +667,7 @@ app.put("/api/putstudent/:id", async (req, res) => {
       });
   }
 });
-app.get('/courses', (req, res) => {
+app.get('/api/courses', (req, res) => {
   res.json(courseData);
 });
 
@@ -706,23 +723,44 @@ app.get("/api/plansed/:id", async (req, res) => {
 
 app.post('/api/create-payment-intents', async (req, res) => {
   try {
-    const existingStudent = await studentModel.findOne({ Email: req.body.Email });
     const paymentIntent = await stripe.paymentIntents.create({
       amount: req.body.amount,
       currency: 'usd',
     });
 
+ 
+
+    return res.status(200).json({
+      clientSecret: paymentIntent.client_secret,
+      message: 'User found and updated with new course enrollments',
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+    });
+  }
+});
+
+
+// Route for creating or updating student information
+app.post('/api/testersuccessuser', async (req, res) => {
+  try {
+    // Perform student creation or update logic here
+    const existingStudent = await studentModel.findOne({ Email: req.body.Email });
+
     if (existingStudent) {
+      // Update existing student
+      // Handle course enrollments update if needed
       for (const enrollment of req.body.courseEnrollments) {
         existingStudent.courseEnrollments.push(enrollment);
       }
       await existingStudent.save();
 
-      return res.status(200).json({
-        clientSecret: paymentIntent.client_secret,
-        message: 'User found and updated with new course enrollments',
-      });
+      return res.status(200).json({ message: 'Student updated successfully' });
     } else {
+      // Create new student
       const student = await studentModel.create({
         ...req.body,
         courseEnrollments: req.body.courseEnrollments,
@@ -731,20 +769,16 @@ app.post('/api/create-payment-intents', async (req, res) => {
       const generatedPassword = student.password;
       const emailOf = student.Email;
       // Assuming you have a function to send login details to the user
-       await sendloginpassword(emailOf, generatedPassword);
+      await sendloginpassword(emailOf, generatedPassword);
 
-      return res.status(200).json({
-        clientSecret: paymentIntent.client_secret,
-        message: 'User created with course enrollments',
-      });
+      return res.status(200).json({ message: 'Student created successfully' });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Internal Server Error',
-    });
+    console.error('Student creation/update error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.post("/api/sendemail", async (req, res) => {
   const { Name, Email, Phone, Message } = req.body;
@@ -770,11 +804,11 @@ app.post("/api/sennews", async (req, res) => {
 });
 
 app.post("/api/login", async (request, response) => {
-  console.log(request.body);
 
   try {
     const { Email, password } = request.body;
     const person = await studentModel.findOne({ Email: { $regex: new RegExp('^' + Email + '$', 'i') } });
+ 
 
     if (!person) {
       return response.json({
@@ -788,7 +822,7 @@ app.post("/api/login", async (request, response) => {
     // Use === for comparison
     if (password === person.password) {
       const token = jwt.sign(
-        {  Email: person.Email, id: person._id ,Name :person.fullName},
+        {  Email: person.Email, id: person._id ,Name :person.fullName,Address:person.address,zip:person.zip},
         secretkey
       );
       return response.json({
@@ -924,9 +958,12 @@ app.post("/api/sendpdfs", upload.single("pdf"), async (req, res) => {
 });
 
 
-  mongoose.connect("mongodb+srv://Payment:0r2WQgUnKteLXgYF@payment.9nyqfls.mongodb.net/United").then(() => {
-  console.log("db  is running on port 3003 ")
-  app.listen(3003, () => {
-    console.log("db and server is running on port 3003 ")
+mongoose.connect(process.env.MONGO_URL).then(() => {
+  console.log("Connected to MongoDB")
+  // Start the server after successfully connecting to the database
+  app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`)
   })
+}).catch(error => {
+  console.error("Error connecting to MongoDB:", error);
 });

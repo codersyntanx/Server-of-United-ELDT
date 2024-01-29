@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const questionSchema = new mongoose.Schema({
   lessonId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
+    ref: 'Course.chapters',
     required: true,
   },
   questions: [{
