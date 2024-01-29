@@ -98,9 +98,9 @@ app.post('/api/saveResult', async (req, res) => {
 });
 
 
-app.get('/api/getCourseChapters/:studentId/:courseId', async (req, res) => {
+app.get('/api/getCourseChapters/:studentId/:enrolledCourseIndex', async (req, res) => {
   try {
-    const { studentId, courseId } = req.params;
+    const { studentId, enrolledCourseIndex } = req.params;
 
     // Find the student by ID
     const student = await studentModel.findById(studentId);
@@ -109,17 +109,20 @@ app.get('/api/getCourseChapters/:studentId/:courseId', async (req, res) => {
       return res.status(404).json({ error: 'Student not found' });
     }
 
-    // Check if the student is enrolled in the specified course
-    const enrollment = student.courseEnrollments.find(
-      (enrollment) => enrollment.courseId.toString() === courseId
-    );
-
-    if (!enrollment) {
-      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    // Check if the student has any course enrollment
+    if (!student.courseEnrollments || student.courseEnrollments.length === 0) {
+      return res.status(400).json({ error: 'Student is not enrolled in any courses' });
     }
 
+    // Check if the enrolledCourseIndex is within bounds
+    if (enrolledCourseIndex < 0 || enrolledCourseIndex >= student.courseEnrollments.length) {
+      return res.status(400).json({ error: 'Invalid enrolled course index' });
+    }
+
+    const enrollment = student.courseEnrollments[enrolledCourseIndex];
+
     // Find the course by ID
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(enrollment.courseId);
 
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
@@ -155,6 +158,7 @@ app.get('/api/getCourseChapters/:studentId/:courseId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 app.get('/api/getChapterTitles/:studentId/:enrolledCourseIndex', async (req, res) => {
