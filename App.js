@@ -104,7 +104,7 @@ app.post('/saveResult', async (req, res) => {
 
 
 
-app.get('/getCourseChapters/:studentId/:courseId', async (req, res) => {
+app.get('/api/getCourseChapters/:studentId/:courseId', async (req, res) => {
   try {
     const { studentId, courseId } = req.params;
 
@@ -134,31 +134,34 @@ app.get('/getCourseChapters/:studentId/:courseId', async (req, res) => {
     // Extract information based on language and lesson index
     const { language, lessonIndex } = enrollment;
 
-    // Filter chapters by language and get the chapters up to the lessonIndex
-    const chaptersToSend = course.chapters
-      .filter((chapter) => chapter.language === language)
-      .slice(0, lessonIndex + 1);
+    // Filter chapters by language
+    const chaptersForLanguage = course.chapters.filter((chapter) => chapter.language === language);
+
+    // Get the total number of chapters for the specified language
+    const totalChaptersForLanguage = chaptersForLanguage.length;
+
+    // Get the chapters up to the lessonIndex
+    const chaptersToSend = chaptersForLanguage.slice(0, lessonIndex + 1);
 
     // Calculate student progress percentage
-    const totalChapters = course.chapters.length;
-    const progressPercentage = (lessonIndex + 1) / totalChapters * 100;
+    const progressPercentage = (lessonIndex + 1) / totalChaptersForLanguage * 100;
 
     return res.json({
       studentProgress: {
         lessonIndex: lessonIndex + 1,
-        totalChapters,
+        totalChapters: totalChaptersForLanguage,
         progressPercentage,
       },
       courseName: course.courseName,
       language,
       chapters: chaptersToSend,
-     
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 app.get('/getChapterTitles/:studentId/:courseId', async (req, res) => {
