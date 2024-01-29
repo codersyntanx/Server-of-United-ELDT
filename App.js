@@ -754,14 +754,11 @@ app.post('/api/testersuccessuser', async (req, res) => {
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
 
     if (existingStudent) {
-      // Update existing student
-      // Handle course enrollments update if needed
-      for (const enrollment of req.body.courseEnrollments) {
-        existingStudent.courseEnrollments.push(enrollment);
-      }
+      // Update existing student's course enrollments only
+      existingStudent.courseEnrollments = req.body.courseEnrollments;
       await existingStudent.save();
 
-      return res.status(200).json({ message: 'Student updated successfully' });
+      return res.status(200).json({ message: 'Course enrollments updated successfully' });
     } else {
       // Create new student
       const student = await studentModel.create({
@@ -781,6 +778,7 @@ app.post('/api/testersuccessuser', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 app.post("/api/sendemail", async (req, res) => {
