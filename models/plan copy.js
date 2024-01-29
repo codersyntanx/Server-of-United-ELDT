@@ -59,11 +59,11 @@ const studentSchema = new mongoose.Schema({
     type: String,
   },
 });
-
 studentSchema.pre("save", async function (next) {
-  // Generate a temporary password only if it's a new student or password is being modified
-  if (!this.isModified("password") || !this.password) {
+  // Check if the document is new or if the password field is being modified
+  if (this.isNew || this.isModified("password")) {
     try {
+      // Generate a temporary password only if it's a new student or password is being modified
       const temporaryPassword = generateTemporaryPassword();
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
@@ -78,6 +78,7 @@ studentSchema.pre("save", async function (next) {
     next();
   }
 });
+
 
 
 
