@@ -493,7 +493,7 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    // Find the chapter based on the provided index number
+    // Find the chapter based on the provided index number and language
     const chapterIndex = parseInt(indexNumber, 10);
     if (isNaN(chapterIndex)) {
       return res.status(400).json({ error: 'Invalid index number' });
@@ -509,10 +509,15 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(404).json({ error: 'Chapter not found for the enrolled language' });
     }
 
-    const chapterTitle = chapter.lessonTitle;
+    const chapterAtIndex = chapter[chapterIndex];
+    if (!chapterAtIndex) {
+      return res.status(404).json({ error: 'Chapter not found for the provided index number' });
+    }
+
+    const chapterTitle = chapterAtIndex.lessonTitle;
 
     // Fetch questions based on the chapter's lesson ID
-    const questions = await Question.find({ lessonId: chapter._id });
+    const questions = await Question.find({ lessonId: chapterAtIndex._id });
 
     res.status(200).json({ questions, chapterTitle });
   } catch (error) {
@@ -520,6 +525,7 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
