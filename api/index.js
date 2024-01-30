@@ -467,9 +467,9 @@ app.get('/api/getQuestionsByLessonId/:lessonId', async (req, res) => {
   }
 });
 
-app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (req, res) => {
+app.get('/api/getQuestionsForStudent/:studentId/:enrollmentIndex/:indexNumber', async (req, res) => {
   try {
-    const { studentId, courseId, indexNumber } = req.params;
+    const { studentId, enrollmentIndex, indexNumber } = req.params;
 
     // Check if the student is enrolled in the specified course
     const student = await studentModel.findById(studentId);
@@ -477,15 +477,15 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(404).json({ error: 'Student not found' });
     }
 
-    const enrollment = student.courseEnrollments.find(
-      (enrollment) => enrollment.courseId.toString() === courseId
-    );
-
-    if (!enrollment) {
-      return res.status(400).json({ error: 'Student is not enrolled in the specified course' });
+    // Check if the enrollmentIndex is valid
+    const enrollmentIndexInt = parseInt(enrollmentIndex, 10);
+    if (isNaN(enrollmentIndexInt) || enrollmentIndexInt < 0 || enrollmentIndexInt >= student.courseEnrollments.length) {
+      return res.status(400).json({ error: 'Invalid enrollment index' });
     }
 
-    const lessonIndex = enrollment.lessonIndex;
+    // Retrieve enrollment details based on the provided index
+    const enrollment = student.courseEnrollments[enrollmentIndexInt];
+    const { courseId, lessonIndex, language } = enrollment;
 
     // Find the course by ID
     const course = await Course.findById(courseId);
@@ -503,23 +503,23 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(400).json({ error: 'Index number must be less than or equal to lessonIndex' });
     }
 
-    const chapter = course.chapters.find(chapter => chapter.language === enrollment.language);
+    // Filter chapters based on language
+    const chaptersByLanguage = course.chapters.filter((chapter) => chapter.language === language);
+    if (chaptersByLanguage.length === 0) {
+      return res.status(404).json({ error: 'Chapters not found for the specified language' });
+    }
 
+    const chapter = chaptersByLanguage[chapterIndex];
     if (!chapter) {
-      return res.status(404).json({ error: 'Chapter not found for the enrolled language' });
+      return res.status(404).json({ error: 'Chapter not found' });
     }
 
-    const chapterAtIndex = chapter[chapterIndex];
-    if (!chapterAtIndex) {
-      return res.status(404).json({ error: 'Chapter not found for the provided index number' });
-    }
-
-    const chapterTitle = chapterAtIndex.lessonTitle;
+    const chaptertitle = chapter.lessonTitle;
 
     // Fetch questions based on the chapter's lesson ID
-    const questions = await Question.find({ lessonId: chapterAtIndex._id });
+    const questions = await Question.find({ lessonId: chapter._id });
 
-    res.status(200).json({ questions, chapterTitle });
+    res.status(200).json({ questions, chaptertitle });
   } catch (error) {
     console.error('Error fetching questions for student:', error);
     res.status(500).json({ error: 'Internal Server Error' });
