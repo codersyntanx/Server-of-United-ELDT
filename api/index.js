@@ -503,15 +503,18 @@ app.get('/api/getQuestionsForStudent/:studentId/:courseId/:indexNumber', async (
       return res.status(400).json({ error: 'Index number must be less than or equal to lessonIndex' });
     }
 
-    const chapter = course.chapters[chapterIndex];
+    const chapter = course.chapters.find(chapter => chapter.language === enrollment.language);
+
     if (!chapter) {
-      return res.status(404).json({ error: 'Chapter not found' });
+      return res.status(404).json({ error: 'Chapter not found for the enrolled language' });
     }
-const chaptertitle = chapter.lessonTitle
+
+    const chapterTitle = chapter.lessonTitle;
+
     // Fetch questions based on the chapter's lesson ID
     const questions = await Question.find({ lessonId: chapter._id });
 
-    res.status(200).json({questions, chaptertitle});
+    res.status(200).json({ questions, chapterTitle });
   } catch (error) {
     console.error('Error fetching questions for student:', error);
     res.status(500).json({ error: 'Internal Server Error' });
