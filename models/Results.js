@@ -6,9 +6,8 @@ const resultSchema = new mongoose.Schema({
     ref: 'Student',
     required: true,
   },
-  courseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
+  indexnumber: {
+    type: Number,
     required: true,
   },
   chapterId: {

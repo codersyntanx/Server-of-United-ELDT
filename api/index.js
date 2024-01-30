@@ -85,6 +85,7 @@ app.post('/api/saveResult', async (req, res) => {
           studentId,
           chapterId,
           percentage,
+          indexnumber : indexNumber
         });
         await newResult.save();
       }
