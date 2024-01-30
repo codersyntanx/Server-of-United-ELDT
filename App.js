@@ -282,38 +282,32 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
       return res.status(404).json({ error: 'Student not found' });
     }
 
-     const coursesData = await fetchCoursesData(student.courseEnrollments);
+    const coursesData = await fetchCoursesData(student.courseEnrollments);
     const completedCourses = [];
     const uncompletedCourses = [];
 
-    for (const courseData of coursesData) {
+    coursesData.forEach((courseData, index) => {
       const completed = courseData.completed;
       const totalChapters = courseData.totalChapters;
       const completedChapters = courseData.completedChapters;
       const studentProgress = calculateStudentProgress(completedChapters, totalChapters);
 
+      const courseObject = {
+        courseName: courseData.courseName,
+        courseNameid: courseData.courseNameid,
+        totalChapters: totalChapters,
+        completedChapters: completedChapters,
+        studentProgress: studentProgress,
+        courselangugae: courseData.courselangugae,
+        enrollindex: index, // Add enrollindex property
+      };
+
       if (completed) {
-        completedCourses.push({
-          courseName: courseData.courseName,
-          courseNameid: courseData.courseNameid,
-          totalChapters: totalChapters,
-          completedChapters: completedChapters,
-          studentProgress: studentProgress,
-          courselangugae : courseData.courselangugae
-
-        });
+        completedCourses.push(courseObject);
       } else {
-        uncompletedCourses.push({
-          courseName: courseData.courseName,
-          courseNameid: courseData.courseNameid,
-          totalChapters: totalChapters,
-          completedChapters: completedChapters,
-          studentProgress: studentProgress,
-          courselangugae : courseData.courselangugae
-
-        });
+        uncompletedCourses.push(courseObject);
       }
-    }
+    });
 
     res.status(200).json({
       completedCourses: completedCourses,
@@ -324,6 +318,7 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 async function fetchCoursesData(courseEnrollments) {
   const coursesData = [];
 
