@@ -32,12 +32,11 @@ app.use(bodyParser.json());
 
 app.post('/api/saveResult', async (req, res) => {
   try {
-    const { studentId, courseId, chapterId, percentage } = req.body;
+    const { studentId, indexNumber, chapterId, percentage } = req.body;
 
     // Check if the result for this chapter already exists
     const existingResult = await Results.findOne({
       studentId,
-      courseId,
       chapterId,
     });
 
@@ -50,37 +49,40 @@ app.post('/api/saveResult', async (req, res) => {
         existingResult.percentage = percentage;
         await existingResult.save();
       } else {
-        // Find and update the student's lessonIndex for the given course
+        // Find and update the student's lessonIndex for the given index number
         const student = await studentModel.findById(studentId);
 
         if (!student) {
           return res.status(404).json({ error: 'Student not found' });
         }
 
-        enrollment = student.courseEnrollments.find(enrollment => enrollment.courseId.equals(courseId));
-
-        if (enrollment) {
-          const course = await Course.findById(courseId);
-
-          if (!course) {
-            return res.status(404).json({ error: 'Course not found' });
-          }
-
-          const totalChapters = course.chapters.filter(chapter => chapter.language === enrollment.language).length;
-
-          if (enrollment.lessonIndex + 1 < totalChapters) {
-            enrollment.lessonIndex += 1;
-          } else if (enrollment.lessonIndex + 1 === totalChapters) {
-            enrollment.completed = true;
-          }
-
-          await student.save();
+        // Check if the index number is valid
+        const enrollmentIndex = parseInt(indexNumber, 10);
+        if (isNaN(enrollmentIndex) || enrollmentIndex < 0 || enrollmentIndex >= student.courseEnrollments.length) {
+          return res.status(400).json({ error: 'Invalid enrollment index' });
         }
 
+        enrollment = student.courseEnrollments[enrollmentIndex];
+
+        const course = await Course.findById(enrollment.courseId);
+
+        if (!course) {
+          return res.status(404).json({ error: 'Course not found' });
+        }
+
+        const totalChapters = course.chapters.filter(chapter => chapter.language === enrollment.language).length;
+
+        if (enrollment.lessonIndex + 1 < totalChapters) {
+          enrollment.lessonIndex += 1;
+        } else if (enrollment.lessonIndex + 1 === totalChapters) {
+          enrollment.completed = true;
+        }
+
+        await student.save();
+        
         // Create a new result and save it
         const newResult = new Results({
           studentId,
-          courseId,
           chapterId,
           percentage,
         });
@@ -96,6 +98,7 @@ app.post('/api/saveResult', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 app.get('/api/getCourseChapters/:studentId/:enrolledCourseIndex', async (req, res) => {
