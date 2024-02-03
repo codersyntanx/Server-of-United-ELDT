@@ -9,13 +9,13 @@ const sendloginpassword = async ( Email, Password) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'sbolanos@bceins.com',
-        pass: 'auun qfuw fmdu mseo',
+        user: 'mirza@unitedcdlschool.com',
+        pass: 'agws mnuk lqyp amfq',
       },
       debug: true,
     });
     const info = await transporter.sendMail({
-      from: '"Bolanos" <sbolanos@bceins.com>',
+      from: '"Bolanos" <mirza@unitedcdlschool.com>',
       to: Email,
       subject: `Registration with Bolanos`,
       html: `
