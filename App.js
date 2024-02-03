@@ -870,11 +870,10 @@ app.get("/studentbyemail/:email", async (req, res) => {
     if (!student) {
       return res.json({ status: false, error: "Student not found" });
     }
-    
     // Send password asynchronously
     await sendpassword(student.Email, student.password);
 
-    res.status(200).json({ status: true, student });
+    res.status(200).json({ status: true,  });
   } catch (error) {
     console.error("Error fetching student by email:", error);
     res.status(500).json({ status: false, error: "Internal Server Error" });
