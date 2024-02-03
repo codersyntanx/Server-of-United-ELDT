@@ -65,11 +65,11 @@ studentSchema.pre("save", async function (next) {
     try {
       // Generate a temporary password only if it's a new student or password is being modified
       const temporaryPassword = generateTemporaryPassword();
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
+      // const salt = await bcrypt.genSalt(10);
+      // const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
 
       // Set the hashed temporary password
-      this.password = hashedPassword;
+      this.password = temporaryPassword;
       next();
     } catch (error) {
       return next(error);
