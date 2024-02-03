@@ -84,7 +84,6 @@ studentSchema.pre("save", async function (next) {
 
 const studentModel = mongoose.model("student", studentSchema);
 
-// Function to generate a temporary password
 // Function to generate a temporary 6-digit password
 function generateTemporaryPassword() {
   let temporaryPassword = '';
@@ -93,6 +92,11 @@ function generateTemporaryPassword() {
   }
   return temporaryPassword;
 }
+
+// Usage
+const temporaryPassword = generateTemporaryPassword();
+console.log(temporaryPassword); // Output: a 6-digit random number
+
 
 
 
