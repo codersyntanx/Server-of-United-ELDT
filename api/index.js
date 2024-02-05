@@ -727,7 +727,7 @@ app.post('/api/create-payment-intents', async (req, res) => {
     const { amount, courseEnrollments, fullName, Email, price, address, zip } = req.body;
 
     // Check if the email exists in the database
-    const existingStudent = await Student.findOne({ Email });
+    const existingStudent = await studentModel.findOne({ Email });
 
     if (existingStudent) {
       // Check if the course ID and language match any enrolled course for the student
