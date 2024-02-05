@@ -735,6 +735,7 @@ console.log(existingStudent)
       const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
 console.log(courseId)
 console.log(language)
+console.log(existingStudent.courseEnrollments)
       const enrolledCourse = existingStudent.courseEnrollments.find(enrollment =>
         enrollment.courseId === courseId && enrollment.language === language
       );
