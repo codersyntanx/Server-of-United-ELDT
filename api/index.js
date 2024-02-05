@@ -723,9 +723,10 @@ app.get("/api/plansed/:id", async (req, res) => {
 
 
 app.post('/api/create-payment-intents', async (req, res) => {
+  
   try {
     const { amount, courseEnrollments, fullName, Email, price, address, zip } = req.body;
-
+console.log(req.body)
     // Check if the email exists in the database
     const existingStudent = await studentModel.findOne({ Email });
 console.log(existingStudent)
