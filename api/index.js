@@ -722,24 +722,23 @@ app.get("/api/plansed/:id", async (req, res) => {
 });
 
 
+const { ObjectId } = require('mongodb');
+
 app.post('/api/create-payment-intents', async (req, res) => {
   
   try {
     const { amount, courseEnrollments, fullName, Email, price, address, zip } = req.body;
-console.log(req.body)
     // Check if the email exists in the database
     const existingStudent = await studentModel.findOne({ Email });
-console.log(existingStudent)
     if (existingStudent) {
       // Check if the course ID and language match any enrolled course for the student
       const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
-console.log(courseId)
-console.log(language)
-console.log(existingStudent.courseEnrollments)
+
+      const courseIdObject =new ObjectId(courseId); // Convert courseId string to ObjectId
+
       const enrolledCourse = existingStudent.courseEnrollments.find(enrollment =>
-        enrollment.courseId === courseId && enrollment.language === language
+          enrollment.courseId.equals(courseIdObject) && enrollment.language === language
       );
-console.log(enrolledCourse)
       if (enrolledCourse) {
         // Course with the same ID and language already exists for the student
         return res.status(201).json({
