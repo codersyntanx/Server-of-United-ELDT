@@ -93,9 +93,6 @@ function generateTemporaryPassword() {
   return temporaryPassword;
 }
 
-// Usage
-const temporaryPassword = generateTemporaryPassword();
-console.log(temporaryPassword); // Output: a 6-digit random number
 
 
 

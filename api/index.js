@@ -724,12 +724,33 @@ app.get("/api/plansed/:id", async (req, res) => {
 
 app.post('/api/create-payment-intents', async (req, res) => {
   try {
+    const { amount, courseEnrollments, fullName, Email, price, address, zip } = req.body;
+
+    // Check if the email exists in the database
+    const existingStudent = await Student.findOne({ Email });
+
+    if (existingStudent) {
+      // Check if the course ID and language match any enrolled course for the student
+      const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
+
+      const enrolledCourse = existingStudent.courseEnrollments.find(enrollment =>
+        enrollment.courseId === courseId && enrollment.language === language
+      );
+
+      if (enrolledCourse) {
+        // Course with the same ID and language already exists for the student
+        return res.status(200).json({
+          available: true,
+          message: 'This course already exists for the student.',
+        });
+      }
+    }
+
+    // If the email doesn't exist or the course doesn't exist for the student, proceed with payment intent creation
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: req.body.amount,
+      amount: amount,
       currency: 'usd',
     });
-
- 
 
     return res.status(200).json({
       clientSecret: paymentIntent.client_secret,
@@ -743,6 +764,7 @@ app.post('/api/create-payment-intents', async (req, res) => {
     });
   }
 });
+
 
 
 // Route for creating or updating student information
