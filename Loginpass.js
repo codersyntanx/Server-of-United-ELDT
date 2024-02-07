@@ -9,15 +9,15 @@ const sendloginpassword = async ( Email, Password) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'mirza@unitedcdlschool.com',
-        pass: 'agws mnuk lqyp amfq',
+        user: 'login@unitedeldt.com',
+        pass: 'kqdh tfza wzzg jldm',
       },
       debug: true,
     });
     const info = await transporter.sendMail({
-      from: '"Bolanos" <mirza@unitedcdlschool.com>',
+      from: '"United ELDT" <login@unitedeldt.com>',
       to: Email,
-      subject: `Registration with Bolanos`,
+      subject: `Registration with United ELDT`,
       html: `
         <p>Email:${Email}</p>
         <p>Password:${Password}</p>

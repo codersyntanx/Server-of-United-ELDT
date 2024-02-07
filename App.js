@@ -729,10 +729,11 @@ app.post('/api/create-payment-intents', async (req, res) => {
       const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
 
       const courseIdObject =new ObjectId(courseId); // Convert courseId string to ObjectId
-
+console.log(language)
       const enrolledCourse = existingStudent.courseEnrollments.find(enrollment =>
           enrollment.courseId.equals(courseIdObject) && enrollment.language === language
       );
+      console.log(enrolledCourse)
       if (enrolledCourse) {
         // Course with the same ID and language already exists for the student
         return res.status(201).json({
