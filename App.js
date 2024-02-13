@@ -615,13 +615,40 @@ app.post('/create', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+app.put('/addPage/:courseId/:chapterId', async (req, res) => {
+  try {
+    const { courseId, chapterId } = req.params;
+    const pagesData = req.body; // Array of page objects
+
+    // Validate if pagesData is an array
+    if (!Array.isArray(pagesData)) {
+      return res.status(400).json({ error: 'Invalid data format. Expecting an array of page objects.' });
+    }
+
+    // Iterate over the array of pages and push each page individually
+    const updatedCourse = await Course.findOneAndUpdate(
+      { _id: courseId, 'chapters._id': chapterId },
+      { $push: { 'chapters.$.pages': { $each: pagesData } } }, // Use $each to push multiple items
+      { new: true }
+    );
+
+    if (!updatedCourse) {
+      return res.status(404).json({ error: 'Course or chapter not found.' });
+    }
+
+    res.json(updatedCourse);
+  } catch (error) {
+    console.error('Error adding pages to chapter:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 // Add Chapter to Course
 app.put('/addChapter/:courseId', async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { chapter } = req.body;
-
+    const  chapter  = req.body;
     if (!chapter) {
       return res.status(400).json({ error: 'Invalid data. Please provide chapter details.' });
     }
