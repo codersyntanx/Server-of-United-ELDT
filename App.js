@@ -795,13 +795,13 @@ app.post('/api/testersuccessuser', async (req, res) => {
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
 
     if (existingStudent) {
-      // Update existing student's course enrollments only
-      existingStudent.courseEnrollments = req.body.courseEnrollments;
+      // Update existing student's course enrollments by adding the new course enrollment
+      existingStudent.courseEnrollments.push(req.body.courseEnrollments[0]);
       await existingStudent.save();
-      const studentId = existingStudent._id
-      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount)
+      const studentId = existingStudent._id;
+      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
 
-      return res.status(200).json({ message: 'Course enrollments updated successfully' });
+      return res.status(200).json({ message: 'Course enrollment added successfully' });
     } else {
       // Create new student
       const student = await studentModel.create({
@@ -811,10 +811,11 @@ app.post('/api/testersuccessuser', async (req, res) => {
 
       const generatedPassword = student.password;
       const emailOf = student.Email;
-      const studentId = student._id
+      const studentId = student._id;
       // Assuming you have a function to send login details to the user
       await sendloginpassword(emailOf, generatedPassword);
-     await createResult(studentId,req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount)
+      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
+
       return res.status(200).json({ message: 'Student created successfully' });
     }
   } catch (error) {
@@ -822,6 +823,7 @@ app.post('/api/testersuccessuser', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 async function createResult(studentId, courseId, language, payment) {
   console.log(courseId)
