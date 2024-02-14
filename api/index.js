@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const PlanModel = require("../models/plan")
 const mainPlanModel = require("../models/unitedeldt")
+const Feemodal = require('../models/Fee');
 const studentModel = require("../models/plan copy")
 const { sendloginpassword } = require("../Loginpass");
 const {Contactusemail}= require("../Contactusemail")
@@ -776,24 +777,26 @@ app.post('/api/testersuccessuser', async (req, res) => {
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
 
     if (existingStudent) {
-      // Update existing student's course enrollments by pushing new data
-      for (const enrollment of req.body.courseEnrollments) {
-        existingStudent.courseEnrollments.push(enrollment);
-      }
+      // Update existing student's course enrollments only
+      existingStudent.courseEnrollments = req.body.courseEnrollments;
       await existingStudent.save();
+      const studentId = existingStudent._id
+      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount)
 
       return res.status(200).json({ message: 'Course enrollments updated successfully' });
     } else {
       // Create new student
       const student = await studentModel.create({
         ...req.body,
+        courseEnrollments: req.body.courseEnrollments,
       });
 
       const generatedPassword = student.password;
       const emailOf = student.Email;
+      const studentId = student._id
       // Assuming you have a function to send login details to the user
       await sendloginpassword(emailOf, generatedPassword);
-
+     await createResult(studentId,req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount)
       return res.status(200).json({ message: 'Student created successfully' });
     }
   } catch (error) {
@@ -802,6 +805,24 @@ app.post('/api/testersuccessuser', async (req, res) => {
   }
 });
 
+async function createResult(studentId, courseId, language, payment) {
+  console.log(courseId)
+  try {
+    // Create a new Fee document
+    const fee = await Feemodal.create({
+      studentId: studentId,
+      courseId: courseId,
+      language: language,
+      payment: payment,
+    });
+    
+    console.log('Fee created successfully:', fee);
+    return fee;
+  } catch (error) {
+    console.error('Error creating fee:', error);
+    throw error; // Throw the error to handle it in the calling function
+  }
+}
 
 app.post("/api/sendemail", async (req, res) => {
   const { Name, Email, Phone, Message } = req.body;
@@ -825,7 +846,33 @@ app.post("/api/sennews", async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+app.put('/addPage/:courseId/:chapterId', async (req, res) => {
+  try {
+    const { courseId, chapterId } = req.params;
+    const pagesData = req.body; // Array of page objects
 
+    // Validate if pagesData is an array
+    if (!Array.isArray(pagesData)) {
+      return res.status(400).json({ error: 'Invalid data format. Expecting an array of page objects.' });
+    }
+
+    // Iterate over the array of pages and push each page individually
+    const updatedCourse = await Course.findOneAndUpdate(
+      { _id: courseId, 'chapters._id': chapterId },
+      { $push: { 'chapters.$.pages': { $each: pagesData } } }, // Use $each to push multiple items
+      { new: true }
+    );
+
+    if (!updatedCourse) {
+      return res.status(404).json({ error: 'Course or chapter not found.' });
+    }
+
+    res.json(updatedCourse);
+  } catch (error) {
+    console.error('Error adding pages to chapter:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.post("/api/login", async (request, response) => {
 

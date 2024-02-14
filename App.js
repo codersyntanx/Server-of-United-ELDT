@@ -756,11 +756,9 @@ app.post('/api/create-payment-intents', async (req, res) => {
       const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
 
       const courseIdObject =new ObjectId(courseId); // Convert courseId string to ObjectId
-console.log(language)
       const enrolledCourse = existingStudent.courseEnrollments.find(enrollment =>
           enrollment.courseId.equals(courseIdObject) && enrollment.language === language
       );
-      console.log(enrolledCourse)
       if (enrolledCourse) {
         // Course with the same ID and language already exists for the student
         return res.status(201).json({
@@ -800,6 +798,8 @@ app.post('/api/testersuccessuser', async (req, res) => {
       // Update existing student's course enrollments only
       existingStudent.courseEnrollments = req.body.courseEnrollments;
       await existingStudent.save();
+      const studentId = existingStudent._id
+      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount)
 
       return res.status(200).json({ message: 'Course enrollments updated successfully' });
     } else {
@@ -811,9 +811,10 @@ app.post('/api/testersuccessuser', async (req, res) => {
 
       const generatedPassword = student.password;
       const emailOf = student.Email;
+      const studentId = student._id
       // Assuming you have a function to send login details to the user
       await sendloginpassword(emailOf, generatedPassword);
-
+     await createResult(studentId,req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount)
       return res.status(200).json({ message: 'Student created successfully' });
     }
   } catch (error) {
@@ -821,6 +822,25 @@ app.post('/api/testersuccessuser', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+async function createResult(studentId, courseId, language, payment) {
+  console.log(courseId)
+  try {
+    // Create a new Fee document
+    const fee = await Feemodal.create({
+      studentId: studentId,
+      courseId: courseId,
+      language: language,
+      payment: payment,
+    });
+    
+    console.log('Fee created successfully:', fee);
+    return fee;
+  } catch (error) {
+    console.error('Error creating fee:', error);
+    throw error; // Throw the error to handle it in the calling function
+  }
+}
 
 
 
@@ -933,6 +953,7 @@ app.get("/studentbyemail/:email", async (req, res) => {
 
 
 const crypto = require('crypto');
+const Feemodal = require('./models/Fee');
 
 app.post("/api/sendforgetpassword", async (req, res) => {
   try {
