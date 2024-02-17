@@ -114,10 +114,13 @@ const sendloginpassword = async ( Email, Password) => {
               display: inline-block;
               border-radius: 50px;
             }
+            a{
+              color:black;
+            }
             .logo:hover {
               background: #black;
               text-decoration: none !important;
-              color:white;
+              color:white !important;
               display: inline-block;
               font-weight: 500;
               margin-top: 24px;
