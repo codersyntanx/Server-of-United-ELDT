@@ -101,9 +101,23 @@ const sendloginpassword = async ( Email, Password) => {
               color: rgba(0, 0, 0, 0.64);
             }
             .logo {
-              background: #ff96d5;
-              background: linear-gradient(90deg, #ff96d5 35%, #83e7b0 100%);
+              background: #fbb723;
               text-decoration: none !important;
+              color:Black;
+              display: inline-block;
+              font-weight: 500;
+              margin-top: 24px;
+              color: #fff;
+              text-transform: uppercase;
+              font-size: 14px;
+              padding: 10px 24px;
+              display: inline-block;
+              border-radius: 50px;
+            }
+            .logo:hover {
+              background: #black;
+              text-decoration: none !important;
+              color:white;
               display: inline-block;
               font-weight: 500;
               margin-top: 24px;
@@ -146,10 +160,10 @@ const sendloginpassword = async ( Email, Password) => {
                   </tr>
                   <tr>
                     <td style="text-align: center">
-                      <a href="https://rakeshmandal.com" title="logo" target="_blank">
+                      <a href="https://www.unitedeldt.com" title="logo" target="_blank">
                         <img
                           width="300"
-                          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg9eY1KulsS0wVS5yfl71R6EiMHFUdqL7ter-L8CBGWPPH2Un0kuqqemWrwV6s7EAC0a9xZ9DiwAmvTqBdg9vKnhlxo86vBXensJLLvhwCoHgambDzpoA5NTlaF10VWLMur5GmLMXXfoo6k/"
+                          src="https://www.unitedeldt.com/static/media/logo%201.6d922c0810f9d53e0ffc14fd493ae1bf.svg"
                           title="logo"
                           alt="logo"
                         />
@@ -185,7 +199,7 @@ const sendloginpassword = async ( Email, Password) => {
                               <strong class="st2">Password</strong>${Password}
                             </p>
       
-                              <a href="login.html" class="logo">
+                              <a href="https://www.unitedeldt.com/login" class="logo">
                                   Login to your Account
                               </a>
                           </td>
@@ -206,7 +220,7 @@ const sendloginpassword = async ( Email, Password) => {
                           let year = d.getFullYear();
                           document.write(year);
                           </script>
-                          html-vs-css.com</strong></p>
+                          United ELDT</strong></p>
                     </td>
                   </tr>
                   <tr>
