@@ -84,12 +84,34 @@ studentSchema.pre("save", async function (next) {
 
 const studentModel = mongoose.model("student", studentSchema);
 
-// Function to generate a temporary 6-digit password
+
+
 function generateTemporaryPassword() {
+  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+
   let temporaryPassword = '';
-  for (let i = 0; i < 6; i++) {
-    temporaryPassword += Math.floor(Math.random() * 10); // Random digit from 0 to 9
+
+  // Add one letter
+  temporaryPassword += letters[Math.floor(Math.random() * letters.length)];
+
+  // Add one number
+  temporaryPassword += numbers[Math.floor(Math.random() * numbers.length)];
+
+  // Add one symbol
+  temporaryPassword += symbols[Math.floor(Math.random() * symbols.length)];
+
+  // Add remaining characters
+  const remainingLength = 12 - temporaryPassword.length;
+  const allCharacters = letters + numbers + symbols;
+  for (let i = 0; i < remainingLength; i++) {
+    temporaryPassword += allCharacters[Math.floor(Math.random() * allCharacters.length)];
   }
+
+  // Shuffle the password characters
+  temporaryPassword = temporaryPassword.split('').sort(() => Math.random() - 0.5).join('');
+
   return temporaryPassword;
 }
 
