@@ -625,8 +625,7 @@ app.post('/api/create', async (req, res) => {
 app.put('/api/addChapter/:courseId', async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { chapter } = req.body;
-
+    const  chapter  = req.body;
     if (!chapter) {
       return res.status(400).json({ error: 'Invalid data. Please provide chapter details.' });
     }
