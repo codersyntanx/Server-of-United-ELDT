@@ -2,7 +2,7 @@ var ApiContracts = require('authorizenet').APIContracts;
 var ApiControllers = require('authorizenet').APIControllers;
 
 
-function chargeCreditCard(amount, courseEnrollments, fullName, Email, price, address, zip, callback) {
+function chargeCreditCard(callback) {
     // Create a new instance of MerchantAuthenticationType and set your API credentials
     var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
     merchantAuthenticationType.setName('9M786CmbxK');
