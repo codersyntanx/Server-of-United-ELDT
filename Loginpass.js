@@ -192,7 +192,11 @@ const sendloginpassword = async ( Email, Password) => {
                         <tr>
                           <td style="padding: 0 35px">
                             <h1 class="h1">Log in</h1>
-                            <p class="p1">Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere perspiciatis id adipisci eius sequi? Vitae, modi sint expedita debitis et, commodi reiciendis praesentium quia nostrum rerum consequatur unde beatae? Nobis!<br /><strong
+                            <p class="p1">
+                            Congratulations on choosing United ELDT to complete your ELDT {Course Name} with us. Once your course is completed within 24 hours your results will be uploaded to the FMCSA TPR registry, if you have any questions please feel free to contact us at support@unitedeldt.com                            
+                            <br />
+                            
+                            <strong
                                 >Please change the password immediately after
                                 login</strong>.
                             </p>

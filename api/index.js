@@ -789,7 +789,7 @@ app.post('/api/testersuccessuser', async (req, res) => {
         ...req.body,
         courseEnrollments: req.body.courseEnrollments,
       });
-
+       
       const generatedPassword = student.password;
       const emailOf = student.Email;
       const studentId = student._id;

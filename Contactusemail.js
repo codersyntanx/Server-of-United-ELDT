@@ -9,20 +9,17 @@ const Contactusemail = async (Name, Email, Phone, Message ,Subject) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'mirza@unitedcdlschool.com',
-        pass: 'agws mnuk lqyp amfq',
+        user: 'support@unitedeldt.com',
+        pass: 'pmtq ljxh ffta uxxo',
       },
       debug: true,
     });
     const info = await transporter.sendMail({
-      from: '"Bolanos" <mirza@unitedcdlschool.com>',
+      from: '"United ELDT" <support@unitedeldt.com>',
       to: Email,
       subject: Subject,
       html: `
-        <p>Name:${Name}</p>
-        <p>Email:${Email}</p>
-        <p>Contact Number:${Phone}</p>
-        <p>Mesage:${Message}</p>
+      <p>Thank you for contacting us. You will be responded to within the next 24 business hours.</p>
       `,
     });
 

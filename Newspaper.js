@@ -9,17 +9,18 @@ const Newpaper = async (Email) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'mirza@unitedcdlschool.com',
-        pass: 'agws mnuk lqyp amfq',
+        user: 'support@unitedeldt.com',
+        pass: 'pmtq ljxh ffta uxxo',
       },
       debug: true,
     });
     const info = await transporter.sendMail({
-      from: '"Bolanos" <mirza@unitedcdlschool.com>',
+      from: '"United ELDT" <support@unitedeldt.com>',
       to: Email,
-      subject: "NewPaper",
+      subject: "United ELDT NewsLetter",
       html: `
-        <p>Email:${Email}</p>
+      <Strong>Thank you for subscribing our Newsletter. </Strong>
+      <p>We welcome you to the United ELDT family.</p>
       `,
     });
 
