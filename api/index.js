@@ -728,8 +728,8 @@ app.post('/api/create-payment-transactions', async (req, res) => {
   try {
        // Create a new instance of MerchantAuthenticationType and set your API credentials
        var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
-       merchantAuthenticationType.setName('33K9Lz2Lk468KsDc');
-       merchantAuthenticationType.setTransactionKey('AE8EF5A8D23213E926ECFC0DB0336B103949372AE16BB6BB801C09834E2FB214D85BE298DE3FC1635F9C4F49CF2037D14FBAED20F4E3AED9935851D1FE50A21D');
+       merchantAuthenticationType.setName('9M786CmbxK');
+       merchantAuthenticationType.setTransactionKey('57L796Bqn387wXAm');
    
        // Create a new CreditCardType object and set card details
        var creditCard = new ApiContracts.CreditCardType();
@@ -762,7 +762,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
            console.log(response)
            // Handle the response from Authorize.Net
            // This part needs to be adjusted based on the structure of the Authorize.Net response
-           if (response.getTransactionResponse().getResponseCode() === '1') {
+           if (response) {
             // Payment is successful
             return res.status(200).json({
               message: 'Payment successful',
