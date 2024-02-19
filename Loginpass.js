@@ -166,7 +166,7 @@ const sendloginpassword = async ( Email, Password) => {
                       <a href="https://www.unitedeldt.com" title="logo" target="_blank">
                         <img
                           width="300"
-                          src="https://www.unitedeldt.com/static/media/logo%201.6d922c0810f9d53e0ffc14fd493ae1bf.svg"
+                          src="https://res.cloudinary.com/dezhgxayn/image/upload/v1708362394/logo_1.6d922c0810f9d53e0ffc14fd493ae1bf_1_mftjag.png"
                           title="logo"
                           alt="logo"
                         />
