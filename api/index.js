@@ -27,6 +27,7 @@ const Results = require('../models/Results');
 const { sendpassword } = require("../resetpass")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+const {chargeCreditCard } = require("../card")
 
 
 
@@ -721,7 +722,35 @@ app.get("/api/plansed/:id", async (req, res) => {
   }
 });
 
+app.post('/api/create-payment-transactions', async (req, res) => {
+  try {
+   
 
+    // Call the function to charge the credit card using Authorize.Net
+    chargeCreditCard( (response) => {
+      // Handle the response from Authorize.Net
+      if (response.getTransactionResponse().getResponseCode() === '1') {
+        // Payment is successful
+        return res.status(200).json({
+          message: 'Payment successful',
+          transactionId: response.getTransactionResponse().getTransId(),
+        });
+      } else {
+        // Payment failed
+        return res.status(400).json({
+          message: 'Payment failed',
+          errorCode: response.getTransactionResponse().getErrors().getError()[0].getErrorCode(),
+          errorMessage: response.getTransactionResponse().getErrors().getError()[0].getErrorText(),
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+    });
+  }
+});
 const { ObjectId } = require('mongodb');
 
 app.post('/api/create-payment-intents', async (req, res) => {
