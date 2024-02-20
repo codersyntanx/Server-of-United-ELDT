@@ -733,9 +733,9 @@ app.post('/api/create-payment-transactions', async (req, res) => {
    
        // Create a new CreditCardType object and set card details
        var creditCard = new ApiContracts.CreditCardType();
-       creditCard.setCardNumber('4111111111111111');
-       creditCard.setExpirationDate('0828');
-       creditCard.setCardCode('999');
+       creditCard.setCardNumber(req.body.cardNumber);
+       creditCard.setExpirationDate(req.body.date);
+       creditCard.setCardCode(req.body.cardCode);
    
        // Create a new PaymentType object and set credit card
        var paymentType = new ApiContracts.PaymentType();
@@ -748,7 +748,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
        var transactionRequestType = new ApiContracts.TransactionRequestType();
        transactionRequestType.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
        transactionRequestType.setPayment(paymentType);
-       transactionRequestType.setAmount("1000");
+       transactionRequestType.setAmount("100");
        // Set other transaction details...
    
        var createRequest = new ApiContracts.CreateTransactionRequest();
@@ -759,7 +759,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
        ctrl.execute(function(){
            var apiResponse = ctrl.getResponse();
            var response = new ApiContracts.CreateTransactionResponse(apiResponse);
-           console.log(response)
+           console.log(response.transactionId.messages.resultCode)
            // Handle the response from Authorize.Net
            // This part needs to be adjusted based on the structure of the Authorize.Net response
            if (response) {
