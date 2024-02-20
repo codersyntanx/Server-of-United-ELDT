@@ -735,7 +735,7 @@ app.get("/api/studentinformation", async (req, res) => {
     // Extract student information
     const studentName = student.fullName;
     const courseIds = student.courseEnrollments[enrolledIndex].courseId;
-
+    const studentfirstname = student.firstName
     // Find the course by ID
     const course = await Course.findById(courseIds);
     if (!course) {
@@ -757,6 +757,7 @@ app.get("/api/studentinformation", async (req, res) => {
       status: true,
       studentName,
       courseName,
+      studentfirstname,
       percentage: averagePercentage
     });
   } catch (error) {
