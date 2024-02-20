@@ -928,7 +928,6 @@ async function handleStudentEnrollment(req, res) {
       const studentId = existingStudent._id;
       await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
 
-      return res.status(200).json({ message: 'Course enrollment added successfully' });
     } else {
       // Create new student
       const student = await studentModel.create({
@@ -943,11 +942,9 @@ async function handleStudentEnrollment(req, res) {
       await sendloginpassword(emailOf, generatedPassword, CourseName);
       await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
 
-      return res.status(200).json({ message: 'Student created successfully' });
     }
   } catch (error) {
     console.error('Student creation/update error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
