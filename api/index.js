@@ -811,7 +811,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
            var apiResponse = ctrl.getResponse();
            var response = new ApiContracts.CreateTransactionResponse(apiResponse);
           // console.log(response.transactionId.messages.resultCode)
-console.log(response)
+console.log(response.transactionResponse.responseCode)
            // Handle the response from Authorize.Net
            // This part needs to be adjusted based on the structure of the Authorize.Net response
            if (response) {
