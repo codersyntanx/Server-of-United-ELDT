@@ -788,7 +788,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
       );
       if (enrolledCourse) {
         // Course with the same ID and language already exists for the student
-        return res.status(201).json({
+        return res.status(200).json({
             available: true,
             message: 'This course already exists for the student.',
         });
