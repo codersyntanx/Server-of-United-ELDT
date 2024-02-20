@@ -773,6 +773,27 @@ var baseURL = 'https://api.authorize.net/xml/v1/request.api';
  // https://apitest.authorize.net/xml/v1/request.api'
 app.post('/api/create-payment-transactions', async (req, res) => {
   try {
+    // Check if the email exists in the database
+    const Email = req.body.Email
+    const courseEnrollments = req.body.courseEnrollments
+    const existingStudent = await studentModel.findOne({ Email });
+    if (existingStudent) {
+      // Check if the course ID and language match any enrolled course for the student
+      const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
+
+      const courseIdObject =new ObjectId(courseId); // Convert courseId string to ObjectId
+
+      const enrolledCourse = existingStudent.courseEnrollments.find(enrollment =>
+          enrollment.courseId.equals(courseIdObject) && enrollment.language === language
+      );
+      if (enrolledCourse) {
+        // Course with the same ID and language already exists for the student
+        return res.status(201).json({
+            available: true,
+            message: 'This course already exists for the student.',
+        });
+    }
+    }
        // Create a new instance of MerchantAuthenticationType and set your API credentials
        var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
        merchantAuthenticationType.setName("9M786CmbxK");
@@ -811,10 +832,9 @@ app.post('/api/create-payment-transactions', async (req, res) => {
            var apiResponse = ctrl.getResponse();
            var response = new ApiContracts.CreateTransactionResponse(apiResponse);
           // console.log(response.transactionId.messages.resultCode)
-console.log(response.transactionResponse.responseCode)
            // Handle the response from Authorize.Net
            // This part needs to be adjusted based on the structure of the Authorize.Net response
-           if (response) {
+           if (response.transactionResponse.responseCode) {
             // Payment is successful
             return res.status(200).json({
               message: 'Payment successful',
