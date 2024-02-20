@@ -1,4 +1,3 @@
-require('dotenv').config()
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -768,17 +767,14 @@ app.get("/api/studentinformation", async (req, res) => {
 var ApiContracts = require('authorizenet').APIContracts;
 var ApiControllers = require('authorizenet').APIControllers;
 
-// Set the environment type based on a configuration variable or environment variable
-var environmentType = process.env.ACCOUNT_TYPE === 'test' ? 'test' : 'live';
-
-// Determine the base URL based on the environment type
-var baseURL = environmentType === 'test' ? 'https://apitest.authorize.net/xml/v1/request.api' : 'https://api.authorize.net/xml/v1/request.api';
+// Set the base URL to the live endpoint
+var baseURL = 'https://api.authorize.net/xml/v1/request.api';
 
 app.post('/api/create-payment-transactions', async (req, res) => {
   try {
        // Create a new instance of MerchantAuthenticationType and set your API credentials
        var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
-       merchantAuthenticationType.setName(process.env.ACCOUNT_TYPE);
+       merchantAuthenticationType.setName("9M786CmbxK");
        merchantAuthenticationType.setTransactionKey("4eb9pA576YH3EqaS");
    
        // Create a new CreditCardType object and set card details
@@ -807,7 +803,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
    
        var ctrl = new ApiControllers.CreateTransactionController(createRequest.getJSON());
        
-       // Set the endpoint URL based on the environment type
+       // Set the endpoint URL to the live endpoint
        ctrl.setEnvironment(baseURL);
        
        ctrl.execute(function(){
@@ -841,7 +837,6 @@ app.post('/api/create-payment-transactions', async (req, res) => {
     });
   }
 });
-
 
 
 const { ObjectId } = require('mongodb');
