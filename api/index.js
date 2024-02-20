@@ -729,7 +729,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
        // Create a new instance of MerchantAuthenticationType and set your API credentials
        var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
        merchantAuthenticationType.setName("9M786CmbxK");
-       merchantAuthenticationType.setTransactionKey("9b4dk6xD634JrS9V");
+       merchantAuthenticationType.setTransactionKey("4eb9pA576YH3EqaS");
    
        // Create a new CreditCardType object and set card details
        var creditCard = new ApiContracts.CreditCardType();
