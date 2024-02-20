@@ -766,11 +766,9 @@ app.get("/api/studentinformation", async (req, res) => {
 });
 var ApiContracts = require('authorizenet').APIContracts;
 var ApiControllers = require('authorizenet').APIControllers;
+const { ObjectId } = require('mongodb');
 
-// Set the base URL to the live endpoint
-//var baseURL = 'https://api.authorize.net/xml/v1/request.api';
 var baseURL = 'https://api.authorize.net/xml/v1/request.api';
- // https://apitest.authorize.net/xml/v1/request.api'
  app.post('/api/create-payment-transactions', async (req, res) => {
   try {
     // Check if the email exists in the database
@@ -841,10 +839,10 @@ var baseURL = 'https://api.authorize.net/xml/v1/request.api';
       // This part needs to be adjusted based on the structure of the Authorize.Net response
       if (response.getTransactionResponse().getResponseCode() === '1') {
         // Payment is successful
-        await handleStudentEnrollment(req, res);
+        const enrollmentResult = await handleStudentEnrollment(req);
         return res.status(200).json({
           message: 'Payment successful',
-          transactionId: response.getTransactionResponse().getTransId(),
+          transactionId: response
         });
       } else {
         // Payment failed
@@ -865,7 +863,7 @@ var baseURL = 'https://api.authorize.net/xml/v1/request.api';
 
 
 
-const { ObjectId } = require('mongodb');
+
 
 app.post('/api/create-payment-intents', async (req, res) => {
   
