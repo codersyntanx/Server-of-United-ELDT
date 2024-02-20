@@ -814,7 +814,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
 console.log(response)
            // Handle the response from Authorize.Net
            // This part needs to be adjusted based on the structure of the Authorize.Net response
-           if (response.transactionId.transactionResponse.messages.message[0].code = 1) {
+           if (response) {
             // Payment is successful
             return res.status(200).json({
               message: 'Payment successful',
