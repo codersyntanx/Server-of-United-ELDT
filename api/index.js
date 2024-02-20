@@ -834,8 +834,9 @@ app.post('/api/create-payment-transactions', async (req, res) => {
           // console.log(response.transactionId.messages.resultCode)
            // Handle the response from Authorize.Net
            // This part needs to be adjusted based on the structure of the Authorize.Net response
-           if (response.transactionResponse.responseCode) {
+           if (response.transactionResponse.responseCode  = 1) {
             // Payment is successful
+            await handleStudentEnrollment(req, res);
             return res.status(200).json({
               message: 'Payment successful',
               transactionId: response,
@@ -908,15 +909,16 @@ app.post('/api/create-payment-intents', async (req, res) => {
 
 
 // Route for creating or updating student information
-app.post('/api/testersuccessuser', async (req, res) => {
+async function handleStudentEnrollment(req, res) {
   try {
-    const coursenameid = req.body.courseEnrollments[0].courseId
+    const coursenameid = req.body.courseEnrollments[0].courseId;
     // Perform student creation or update logic here
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
     const courseidbypurchase = await Course.findById(coursenameid);
-    if(courseidbypurchase){
-  var CourseName = courseidbypurchase.courseName
- }
+    let CourseName = '';
+    if (courseidbypurchase) {
+      CourseName = courseidbypurchase.courseName;
+    }
     if (existingStudent) {
       // Update existing student's course enrollments by adding the new course enrollment
       existingStudent.courseEnrollments.push(req.body.courseEnrollments[0]);
@@ -936,7 +938,7 @@ app.post('/api/testersuccessuser', async (req, res) => {
       const emailOf = student.Email;
       const studentId = student._id;
       // Assuming you have a function to send login details to the user
-      await sendloginpassword(emailOf, generatedPassword,CourseName);
+      await sendloginpassword(emailOf, generatedPassword, CourseName);
       await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
 
       return res.status(200).json({ message: 'Student created successfully' });
@@ -945,7 +947,10 @@ app.post('/api/testersuccessuser', async (req, res) => {
     console.error('Student creation/update error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-});
+}
+
+// Define your route handler using the function
+
 
 
 async function createResult(studentId, courseId, language, payment) {
