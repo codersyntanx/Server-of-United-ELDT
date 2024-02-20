@@ -768,8 +768,10 @@ var ApiContracts = require('authorizenet').APIContracts;
 var ApiControllers = require('authorizenet').APIControllers;
 
 // Set the base URL to the live endpoint
-var baseURL = 'https://api.authorize.net/xml/v1/request.api';
-
+//live account link bellow
+//var baseURL = 'https://api.authorize.net/xml/v1/request.api';
+var baseURL = 'https://apitest.authorize.net/xml/v1/request.api';
+ // https://apitest.authorize.net/xml/v1/request.api'
 app.post('/api/create-payment-transactions', async (req, res) => {
   try {
        // Create a new instance of MerchantAuthenticationType and set your API credentials
@@ -794,7 +796,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
        var transactionRequestType = new ApiContracts.TransactionRequestType();
        transactionRequestType.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
        transactionRequestType.setPayment(paymentType);
-       transactionRequestType.setAmount("1");
+       transactionRequestType.setAmount(req.body.amount);
        // Set other transaction details...
    
        var createRequest = new ApiContracts.CreateTransactionRequest();
