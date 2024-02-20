@@ -1014,6 +1014,49 @@ app.get("/studentbyemail/:email", async (req, res) => {
 });
 
 
+app.get("/api/studentinformation", async (req, res) => {
+  try {
+    const { studentId, enrolledIndex } = req.query; // Assuming studentId and enrolledIndex are passed as query parameters
+
+    // Find the student by ID
+    const student = await studentModel.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    // Extract student information
+    const studentName = student.fullName;
+    const courseIds = student.courseEnrollments[enrolledIndex].courseId;
+
+    // Find the course by ID
+    const course = await Course.findById(courseIds);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    const courseName = `${course.category} ${course.courseName}`;
+    // Find all results for the student in the enrolled course
+    const results = await Results.find({ studentId, indexnumber: parseInt(enrolledIndex) });
+    // Calculate the average percentage
+    let totalPercentage = 0;
+    results.forEach(result => {
+      totalPercentage += result.percentage;
+    });
+    const averagePercentage = results.length > 0 ? totalPercentage / results.length : 0;
+
+    // Send the response
+    res.status(200).json({
+      status: true,
+      studentName,
+      courseName,
+      percentage: averagePercentage
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 const crypto = require('crypto');
 const Feemodal = require('./models/Fee');
