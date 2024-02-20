@@ -768,9 +768,8 @@ var ApiContracts = require('authorizenet').APIContracts;
 var ApiControllers = require('authorizenet').APIControllers;
 
 // Set the base URL to the live endpoint
-//live account link bellow
 //var baseURL = 'https://api.authorize.net/xml/v1/request.api';
-var baseURL = 'https://apitest.authorize.net/xml/v1/request.api';
+var baseURL = 'https://api.authorize.net/xml/v1/request.api';
  // https://apitest.authorize.net/xml/v1/request.api'
 app.post('/api/create-payment-transactions', async (req, res) => {
   try {
