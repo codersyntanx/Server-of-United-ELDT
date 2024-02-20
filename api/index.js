@@ -28,8 +28,7 @@ const { sendpassword } = require("../resetpass")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const {chargeCreditCard } = require("../card")
-var ApiContracts = require('authorizenet').APIContracts;
-var ApiControllers = require('authorizenet').APIControllers;
+
 
 
 
@@ -765,6 +764,12 @@ app.get("/api/studentinformation", async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+var ApiContracts = require('authorizenet').APIContracts;
+var ApiControllers = require('authorizenet').APIControllers;
+
+// Set the base URL to the live endpoint
+var baseURL = 'https://api.authorize.net/xml/v1/request.api';
+
 app.post('/api/create-payment-transactions', async (req, res) => {
   try {
        // Create a new instance of MerchantAuthenticationType and set your API credentials
@@ -797,6 +802,10 @@ app.post('/api/create-payment-transactions', async (req, res) => {
        createRequest.setTransactionRequest(transactionRequestType);
    
        var ctrl = new ApiControllers.CreateTransactionController(createRequest.getJSON());
+       
+       // Set the endpoint URL to the live endpoint
+       ctrl.setEnvironment(baseURL);
+       
        ctrl.execute(function(){
            var apiResponse = ctrl.getResponse();
            var response = new ApiContracts.CreateTransactionResponse(apiResponse);
@@ -828,6 +837,8 @@ app.post('/api/create-payment-transactions', async (req, res) => {
     });
   }
 });
+
+
 const { ObjectId } = require('mongodb');
 
 app.post('/api/create-payment-intents', async (req, res) => {
