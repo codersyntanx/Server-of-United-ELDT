@@ -794,7 +794,7 @@ app.post('/api/create-payment-transactions', async (req, res) => {
        var transactionRequestType = new ApiContracts.TransactionRequestType();
        transactionRequestType.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
        transactionRequestType.setPayment(paymentType);
-       transactionRequestType.setAmount("100");
+       transactionRequestType.setAmount("1");
        // Set other transaction details...
    
        var createRequest = new ApiContracts.CreateTransactionRequest();
