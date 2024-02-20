@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const sendloginpassword = async ( Email, Password) => {
+const sendloginpassword = async ( Email, Password,CourseName) => {
   try {
     if (!Email || !Email.trim()) {  // Fixed typo in the variable name
       throw new Error('Invalid or empty email address');
@@ -193,7 +193,7 @@ const sendloginpassword = async ( Email, Password) => {
                           <td style="padding: 0 35px">
                             <h1 class="h1">Log in</h1>
                             <p class="p1">
-                            Congratulations on choosing United ELDT to complete your ELDT {Course Name} with us. Once your course is completed within 24 hours your results will be uploaded to the FMCSA TPR registry, if you have any questions please feel free to contact us at support@unitedeldt.com                            
+                            Congratulations on choosing United ELDT to complete your ELDT <strong>${CourseName}</strong> with us. Once your course is completed within 24 hours your results will be uploaded to the FMCSA TPR registry, if you have any questions please feel free to contact us at support@unitedeldt.com                            
                             <br />
                             
                             <strong

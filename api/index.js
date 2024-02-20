@@ -837,9 +837,13 @@ app.post('/api/create-payment-intents', async (req, res) => {
 // Route for creating or updating student information
 app.post('/api/testersuccessuser', async (req, res) => {
   try {
+    const coursenameid = req.body.courseEnrollments[0].courseId
     // Perform student creation or update logic here
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
-
+const courseidbypurchase = await Course.findById({coursenameid})
+ if(courseidbypurchase){
+  var CourseName = courseidbypurchase.courseName
+ }
     if (existingStudent) {
       // Update existing student's course enrollments by adding the new course enrollment
       existingStudent.courseEnrollments.push(req.body.courseEnrollments[0]);
@@ -854,12 +858,12 @@ app.post('/api/testersuccessuser', async (req, res) => {
         ...req.body,
         courseEnrollments: req.body.courseEnrollments,
       });
-       
+
       const generatedPassword = student.password;
       const emailOf = student.Email;
       const studentId = student._id;
       // Assuming you have a function to send login details to the user
-      await sendloginpassword(emailOf, generatedPassword);
+      await sendloginpassword(emailOf, generatedPassword,CourseName);
       await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
 
       return res.status(200).json({ message: 'Student created successfully' });
