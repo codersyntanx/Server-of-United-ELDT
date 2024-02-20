@@ -881,8 +881,8 @@ app.post('/api/testersuccessuser', async (req, res) => {
     const coursenameid = req.body.courseEnrollments[0].courseId
     // Perform student creation or update logic here
     const existingStudent = await studentModel.findOne({ Email: req.body.Email });
-const courseidbypurchase = await Course.findById({_id: coursenameid})
- if(courseidbypurchase){
+    const courseidbypurchase = await Course.findById(coursenameid);
+    if(courseidbypurchase){
   var CourseName = courseidbypurchase.courseName
  }
     if (existingStudent) {
