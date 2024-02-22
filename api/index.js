@@ -8,6 +8,7 @@ const studentModel = require("../models/plan copy")
 const { sendloginpassword } = require("../Loginpass");
 const NewsModel = require("../models/NewsModel")
 const {Contactusemail}= require("../Contactusemail")
+const ContactModel =require("../models/ContactUs")
 const multer = require("multer"); // Add multer
 const upload = multer();
  const stripe = require('stripe')('sk_test_51O5F9gFZtgAr5eHPmu3BtPDmmuRPWUmVoitQHFCugNPa1fQVqpOdgefaYVrEfHOVC0Jipu6byrfYmARCWjqyjpy400hyORLjgo');
@@ -1196,6 +1197,7 @@ app.post("/api/contactusemail", async (req, res) => {
 
   try {
     await Contactusemail(name, email, phone, message,subject);
+await ContactModel.create(req.body);
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error(error);
