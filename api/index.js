@@ -6,6 +6,7 @@ const mainPlanModel = require("../models/unitedeldt")
 const Feemodal = require('../models/Fee');
 const studentModel = require("../models/plan copy")
 const { sendloginpassword } = require("../Loginpass");
+const NewsModel = require("../models/NewsModel")
 const {Contactusemail}= require("../Contactusemail")
 const multer = require("multer"); // Add multer
 const upload = multer();
@@ -987,6 +988,7 @@ app.post("/api/sennews", async (req, res) => {
 
   try {
     await Newpaper( Email );
+    await NewsModel.create(req.body)
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error(error);
