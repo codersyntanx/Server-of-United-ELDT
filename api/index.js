@@ -150,11 +150,11 @@ const mainquizid = enrollment.courseId;
     const chaptersToSend = chaptersForLanguage.slice(0, lessonIndex + 1);
 
     // Calculate student progress percentage
-    const progressPercentage = (lessonIndex + 1) / totalChaptersForLanguage * 100;
+    const progressPercentage = (lessonIndex ) / totalChaptersForLanguage * 100;
 
     return res.json({
       studentProgress: {
-        lessonIndex: lessonIndex + 1,
+        lessonIndex: lessonIndex ,
         totalChapters: totalChaptersForLanguage,
         progressPercentage,
       },
