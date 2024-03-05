@@ -101,62 +101,157 @@ app.post('/saveResult', async (req, res) => {
 
 
 
-
-app.post('/api/create-payment-transactions', async (req, res) => {
+app.post('/api/create-google-pay-transaction', async (req, res) => {
   try {
-       // Create a new instance of MerchantAuthenticationType and set your API credentials
-       var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
-       merchantAuthenticationType.setName("5KP3u95bQpv");
-       merchantAuthenticationType.setTransactionKey("346HZ32z3fP4hTG2");
-   
-       // Create a new CreditCardType object and set card details
-       var creditCard = new ApiContracts.CreditCardType();
-       creditCard.setCardNumber('4111111111111111');
-       creditCard.setExpirationDate('0828');
-       creditCard.setCardCode('999');
-   
-       // Create a new PaymentType object and set credit card
-       var paymentType = new ApiContracts.PaymentType();
-       paymentType.setCreditCard(creditCard);
-   
-       // Set up other transaction details like order, billing address, line items, etc.
-       // ...
-   
-       // Create the transaction request
-       var transactionRequestType = new ApiContracts.TransactionRequestType();
-       transactionRequestType.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
-       transactionRequestType.setPayment(paymentType);
-       transactionRequestType.setAmount("1000");
-       // Set other transaction details...
-   
-       var createRequest = new ApiContracts.CreateTransactionRequest();
-       createRequest.setMerchantAuthentication(merchantAuthenticationType);
-       createRequest.setTransactionRequest(transactionRequestType);
-   
-       var ctrl = new ApiControllers.CreateTransactionController(createRequest.getJSON());
-       ctrl.execute(function(){
-           var apiResponse = ctrl.getResponse();
-           var response = new ApiContracts.CreateTransactionResponse(apiResponse);
-           console.log(response)
-           // Handle the response from Authorize.Net
-           // This part needs to be adjusted based on the structure of the Authorize.Net response
-           if (response) {
-            // Payment is successful
-            return res.status(200).json({
-              message: 'Payment successful',
-              transactionId: response,
-            });
-          } else {
-            // Payment failed
-            return res.status(400).json({
-              message: 'Payment failed',
-              errorCode: response,
-              errorMessage: response,
-            });
-          }
-       });
+    // Create a new instance of MerchantAuthenticationType and set your API credentials
+    var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
+    merchantAuthenticationType.setName("9M786CmbxK");
+    merchantAuthenticationType.setTransactionKey("4eb9pA576YH3EqaS");
 
- 
+    // Extract Google Pay token from the request body
+    const googlePayToken = req.body.googlePayToken;
+
+    // Create a new OpaqueDataType object and set Google Pay token
+    var opaqueData = new ApiContracts.OpaqueDataType();
+    opaqueData.setDataDescriptor('COMMON.GOOGLE.INAPP.PAYMENT');
+    opaqueData.setDataValue(googlePayToken);
+
+    // Create a new PaymentType object and set opaque data
+    var paymentType = new ApiContracts.PaymentType();
+    paymentType.setOpaqueData(opaqueData);
+
+    // Set up other transaction details like order, billing address, line items, etc.
+    // ...
+
+    // Create the transaction request
+    var transactionRequestType = new ApiContracts.TransactionRequestType();
+    transactionRequestType.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
+    transactionRequestType.setPayment(paymentType);
+    transactionRequestType.setAmount("1");
+    // Set other transaction details...
+
+    var createRequest = new ApiContracts.CreateTransactionRequest();
+    createRequest.setMerchantAuthentication(merchantAuthenticationType);
+    createRequest.setTransactionRequest(transactionRequestType);
+
+    var ctrl = new ApiControllers.CreateTransactionController(createRequest.getJSON());
+    ctrl.execute(function(){
+        var apiResponse = ctrl.getResponse();
+        var response = new ApiContracts.CreateTransactionResponse(apiResponse);
+        console.log(response)
+        // Handle the response from Authorize.Net
+        // This part needs to be adjusted based on the structure of the Authorize.Net response
+        if (response) {
+          // Payment is successful
+          return res.status(200).json({
+            message: 'Payment successful',
+            transactionId: response.getTransactionResponse().getTransId(),
+          });
+        } else {
+          // Payment failed
+          return res.status(400).json({
+            message: 'Payment failed',
+            errorCode: response.getTransactionResponse().getErrors().getError()[0].getErrorCode(),
+            errorMessage: response.getTransactionResponse().getErrors().getError()[0].getErrorText(),
+          });
+        }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+    });
+  }
+});
+
+
+
+
+var baseURL = 'https://api.authorize.net/xml/v1/request.api';
+ app.post('/api/create-payment-transactions', async (req, res) => {
+  try {
+    // Check if the email exists in the database
+    const Email = req.body.Email;
+    const courseEnrollments = req.body.courseEnrollments;
+    const existingStudent = await studentModel.findOne({ Email });
+
+    if (existingStudent) {
+      // Check if the course ID and language match any enrolled course for the student
+      const { courseId, language } = courseEnrollments[0]; // Assuming one course enrollment per request for simplicity
+
+      const courseIdObject = new ObjectId(courseId); // Convert courseId string to ObjectId
+
+      const enrolledCourse = existingStudent.courseEnrollments.find(
+        (enrollment) =>
+          enrollment.courseId.equals(courseIdObject) &&
+          enrollment.language === language
+      );
+
+      if (enrolledCourse) {
+        // Course with the same ID and language already exists for the student
+        return res.status(200).json({
+          available: true,
+          message: 'This course already exists for the student.',
+        });
+      }
+    }
+
+    // Create a new instance of MerchantAuthenticationType and set your API credentials
+    var merchantAuthenticationType = new ApiContracts.MerchantAuthenticationType();
+    merchantAuthenticationType.setName("9M786CmbxK");
+    merchantAuthenticationType.setTransactionKey("4eb9pA576YH3EqaS");
+
+    // Create a new CreditCardType object and set card details
+    var creditCard = new ApiContracts.CreditCardType();
+    creditCard.setCardNumber(req.body.cardNumber);
+    creditCard.setExpirationDate(req.body.date);
+    creditCard.setCardCode(req.body.cardCode);
+
+    // Create a new PaymentType object and set credit card
+    var paymentType = new ApiContracts.PaymentType();
+    paymentType.setCreditCard(creditCard);
+
+    // Set up other transaction details like order, billing address, line items, etc.
+    // ...
+
+    // Create the transaction request
+    var transactionRequestType = new ApiContracts.TransactionRequestType();
+    transactionRequestType.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
+    transactionRequestType.setPayment(paymentType);
+    transactionRequestType.setAmount(req.body.amount);
+    // Set other transaction details...
+
+    var createRequest = new ApiContracts.CreateTransactionRequest();
+    createRequest.setMerchantAuthentication(merchantAuthenticationType);
+    createRequest.setTransactionRequest(transactionRequestType);
+
+    var ctrl = new ApiControllers.CreateTransactionController(createRequest.getJSON());
+
+    // Set the endpoint URL to the live endpoint
+    ctrl.setEnvironment(baseURL);
+
+    ctrl.execute(async function () {
+      var apiResponse = ctrl.getResponse();
+      var response = new ApiContracts.CreateTransactionResponse(apiResponse);
+
+      // Handle the response from Authorize.Net
+      // This part needs to be adjusted based on the structure of the Authorize.Net response
+      if (response.getTransactionResponse().getResponseCode() === '1') {
+        // Payment is successful
+        const enrollmentResult = await handleStudentEnrollment(req);
+        return res.status(200).json({
+          message: 'Payment successful',
+          transactionId: response
+        });
+      } else {
+        // Payment failed
+        return res.status(400).json({
+          message: 'Payment failed',
+          errorCode: response.getTransactionResponse().getResponseCode(),
+          errorMessage: response.getTransactionResponse().getResponseReasonText(),
+        });
+      }
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({

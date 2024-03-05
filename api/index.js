@@ -29,7 +29,6 @@ const Results = require('../models/Results');
 const { sendpassword } = require("../resetpass")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-const {chargeCreditCard } = require("../card")
 
 
 
