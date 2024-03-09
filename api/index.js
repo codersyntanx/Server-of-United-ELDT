@@ -910,6 +910,43 @@ app.post('/api/create-payment-intents', async (req, res) => {
 });
 
 
+app.post('/api/enroll-student', async (req, res) => {
+  try {
+    const coursenameid = req.body.courseEnrollments[0].courseId;
+    // Perform student creation or update logic here
+    const existingStudent = await studentModel.findOne({ Email: req.body.Email });
+    const courseidbypurchase = await Course.findById(coursenameid);
+    let CourseName = '';
+    if (courseidbypurchase) {
+      CourseName = courseidbypurchase.courseName;
+    }
+    if (existingStudent) {
+      // Update existing student's course enrollments by adding the new course enrollment
+      existingStudent.courseEnrollments.push(req.body.courseEnrollments[0]);
+      await existingStudent.save();
+      const studentId = existingStudent._id;
+      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
+      res.status(200).json({ message: 'Student course enrollment updated successfully' });
+    } else {
+      // Create new student
+      const student = await studentModel.create({
+        ...req.body,
+        courseEnrollments: req.body.courseEnrollments,
+      });
+
+      const generatedPassword = student.password;
+      const emailOf = student.Email;
+      const studentId = student._id;
+      // Assuming you have a function to send login details to the user
+      await sendloginpassword(emailOf, generatedPassword, CourseName);
+      await createResult(studentId, req.body.courseEnrollments[0].courseId, req.body.courseEnrollments[0].language, req.body.amount);
+      res.status(201).json({ message: 'Student enrolled successfully' });
+    }
+  } catch (error) {
+    console.error('Student creation/update error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Route for creating or updating student information
 async function handleStudentEnrollment(req, res) {
