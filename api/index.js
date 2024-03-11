@@ -835,7 +835,7 @@ var baseURL = 'https://api.authorize.net/xml/v1/request.api';
     ctrl.execute(async function () {
       var apiResponse = ctrl.getResponse();
       var response = new ApiContracts.CreateTransactionResponse(apiResponse);
-console.log(response)
+
       // Handle the response from Authorize.Net
       // This part needs to be adjusted based on the structure of the Authorize.Net response
       if (response.getTransactionResponse().getResponseCode() === '1') {
