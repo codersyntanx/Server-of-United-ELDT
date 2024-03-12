@@ -80,6 +80,7 @@ app.post('/api/saveResult', async (req, res) => {
           enrollment.lessonIndex += 1;
         } else if (enrollment.lessonIndex + 1 === totalChapters) {
           enrollment.completed = true;
+          enrollment.lessonIndex += 1;
         }
 
         await student.save();
