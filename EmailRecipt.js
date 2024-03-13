@@ -269,7 +269,7 @@ const EmailRecipt = async ( studentfullname, CourseName,amount,Email) => {
               
         <div style="font-size: 14px; color: #333333; line-height: 140%; text-align: left; word-wrap: break-word;">
           <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px;">Class A</span></p>
-      <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 16px; line-height: 22.4px; color: #17c297;">Spanish</span></p>
+      <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 16px; line-height: 22.4px; color: #17c297;"></span></p>
         </div>
       
             </td>
