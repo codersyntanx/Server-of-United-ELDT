@@ -924,6 +924,10 @@ app.post('/api/enroll-student', async (req, res) => {
     if (courseidbypurchase) {
       CourseName = courseidbypurchase.courseName;
     }
+    const studentfullname = req.body.fullName
+    const amount = req.body.amount
+    const Email = req.body.Email
+    EmailRecipt(studentfullname,CourseName,amount,Email)
     if (existingStudent) {
       // Update existing student's course enrollments by adding the new course enrollment
       existingStudent.courseEnrollments.push(req.body.courseEnrollments[0]);
@@ -963,6 +967,10 @@ async function handleStudentEnrollment(req, res) {
     if (courseidbypurchase) {
       CourseName = courseidbypurchase.courseName;
     }
+    const studentfullname = req.body.fullName
+    const amount = req.body.amount
+    const Email = req.body.Email
+    EmailRecipt(studentfullname,CourseName,amount,Email)
     if (existingStudent) {
       // Update existing student's course enrollments by adding the new course enrollment
       existingStudent.courseEnrollments.push(req.body.courseEnrollments[0]);
@@ -1189,6 +1197,7 @@ app.post('/api/testersuccessuser', async (req, res) => {
 
 
 const crypto = require('crypto');
+const { EmailRecipt } = require("../EmailRecipt");
 
 app.post("/api/sendforgetpassword", async (req, res) => {
   try {

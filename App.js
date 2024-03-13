@@ -32,6 +32,16 @@ const {chargeCreditCard } = require("./card")
 var ApiContracts = require('authorizenet').APIContracts;
 var ApiControllers = require('authorizenet').APIControllers;
 
+app.get("/",async (req, res) => {
+  const studentfullname = "Mr tester";
+  const CourseName = "CLASS A";
+  const amount = "50";
+  const Email = "codesyntanx@gmail.com"
+ await EmailRecipt(studentfullname,CourseName,amount,Email)
+res.send("sent")
+})
+
+
 app.post('/saveResult', async (req, res) => {
   try {
     const { studentId, courseId, chapterId, percentage } = req.body;
@@ -1155,6 +1165,7 @@ app.get("/api/studentinformation", async (req, res) => {
 
 const crypto = require('crypto');
 const Feemodal = require('./models/Fee');
+const { EmailRecipt } = require('./EmailRecipt');
 
 app.post("/api/sendforgetpassword", async (req, res) => {
   try {
