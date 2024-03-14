@@ -226,6 +226,32 @@ app.get('/api/getChapterTitles/:studentId/:enrolledCourseIndex', async (req, res
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+app.get('/api/getchapinfo', async (req, res) => {
+  try {
+    // Find the first document in the Course collection
+    const course = await Course.findOne();
+
+    if (!course) {
+      return res.status(404).json({ error: 'No courses found' });
+    }
+
+    // Extract chapter titles from the first document
+    const chapterTitles = course.chapters
+  .filter(chapter => chapter.language === 'English') // Filter chapters by language
+  .map(chapter => ({
+    title: chapter.lessonTitle,
+    chapId: chapter._id,
+  }));
+
+    return res.json({
+      courseName: course.courseName,
+      chapters: chapterTitles,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 

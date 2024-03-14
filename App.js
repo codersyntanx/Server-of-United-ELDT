@@ -40,6 +40,33 @@ app.get("/",async (req, res) => {
  await EmailRecipt(studentfullname,CourseName,amount,Email)
 res.send("sent")
 })
+app.get('/api/getchapinfo', async (req, res) => {
+  try {
+    // Find the first document in the Course collection with language set to English
+    const course = await Course.findOne();
+
+    if (!course) {
+      return res.status(404).json({ error: 'No English courses found' });
+    }
+
+    // Extract chapter titles from the first English course document
+    const chapterTitles = course.chapters
+  .filter(chapter => chapter.language === 'English') // Filter chapters by language
+  .map(chapter => ({
+    title: chapter.lessonTitle,
+    chapId: chapter._id,
+  }));
+
+
+    return res.json({
+      courseName: course.courseName,
+      chapters: chapterTitles,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 app.post('/saveResult', async (req, res) => {
