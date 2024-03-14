@@ -237,11 +237,13 @@ app.get('/api/getchapinfo', async (req, res) => {
 
     // Extract chapter titles from the first document
     const chapterTitles = course.chapters
-  .filter(chapter => chapter.language === 'English') // Filter chapters by language
-  .map(chapter => ({
-    title: chapter.lessonTitle,
-    chapId: chapter._id,
-  }));
+    .filter(chapter => chapter.language === 'English') // Filter chapters by language
+    .slice(0, 9) // Take only the first 9 chapters
+    .map(chapter => ({
+      title: chapter.lessonTitle,
+      chapId: chapter._id,
+    }));
+  
 
     return res.json({
       courseName: course.courseName,
