@@ -409,7 +409,7 @@ function calculateStudentProgress(completedChapters, totalChapters) {
 
 app.get("/api/courses", async (req, res) => {
   try {
-    const courses = await Course.find({}, "courseName category price image").exec();
+    const courses = await Course.find({}, "courseName category price image thumnail videourl").exec();
     res.json(courses);
   } catch (error) {
     console.error(error);
