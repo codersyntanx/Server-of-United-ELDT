@@ -39,6 +39,12 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  thumnail:{
+    type: String,
+  },
+  videourl:{
+    type: String,
+  },
   chapters: [chapterSchema],
 }, { timestamps: true });
 
